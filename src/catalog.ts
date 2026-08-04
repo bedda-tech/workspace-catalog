@@ -18,6 +18,7 @@
 import { defineCatalog } from "@json-render/core";
 import { schema } from "@json-render/react/schema";
 import { shadcnComponentDefinitions as defs } from "@json-render/shadcn";
+import { sharedActions } from "./actions.js";
 
 export const catalog = defineCatalog(schema, {
   components: {
@@ -68,12 +69,11 @@ export const catalog = defineCatalog(schema, {
     Popover: defs.Popover,
   },
   /**
-   * Deliberately empty for now. Familiar's ask semantics — answers as auditable messages,
-   * single-use cards, retraction, the free-text note — land here as named actions in the
-   * next step, so both surfaces get them rather than only chat. Do not add ad-hoc actions
-   * in a consumer; an action only one surface understands breaks the promotion path.
+   * Shared by definition: an action only one surface understands breaks the promotion
+   * path, so definitions live here and each surface registers its own handler. See
+   * actions.ts for what these encode and why.
    */
-  actions: {},
+  actions: sharedActions,
 });
 
 /**

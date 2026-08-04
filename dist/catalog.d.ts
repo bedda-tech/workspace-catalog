@@ -541,12 +541,26 @@ export declare const catalog: import("@json-render/core").Catalog<{
         };
     };
     /**
-     * Deliberately empty for now. Familiar's ask semantics — answers as auditable messages,
-     * single-use cards, retraction, the free-text note — land here as named actions in the
-     * next step, so both surfaces get them rather than only chat. Do not add ad-hoc actions
-     * in a consumer; an action only one surface understands breaks the promotion path.
+     * Shared by definition: an action only one surface understands breaks the promotion
+     * path, so definitions live here and each surface registers its own handler. See
+     * actions.ts for what these encode and why.
      */
-    actions: {};
+    actions: {
+        readonly answer: {
+            readonly params: import("zod").ZodObject<{
+                id: import("zod").ZodString;
+                value: import("zod").ZodUnknown;
+                note: import("zod").ZodOptional<import("zod").ZodString>;
+            }, import("zod/v4/core").$strip>;
+            readonly description: string;
+        };
+        readonly navigate: {
+            readonly params: import("zod").ZodObject<{
+                href: import("zod").ZodString;
+            }, import("zod/v4/core").$strip>;
+            readonly description: string;
+        };
+    };
 }>;
 /**
  * Component names the catalog admits, for validators and prompt builders.
