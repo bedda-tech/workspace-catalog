@@ -9,7 +9,7 @@ import { readFileSync } from "node:fs";
 
 test("committed dist matches a fresh build of src", () => {
   execSync("npx tsc -p tsconfig.json --outDir /tmp/wc-dist-check", { stdio: "pipe" });
-  for (const f of ["index.js", "catalog.js", "index.d.ts", "catalog.d.ts"]) {
+  for (const f of ["index.js", "catalog.js", "react.js", "index.d.ts", "catalog.d.ts", "react.d.ts"]) {
     assert.equal(
       readFileSync(`dist/${f}`, "utf8"),
       readFileSync(`/tmp/wc-dist-check/${f}`, "utf8"),
