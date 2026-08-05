@@ -32,6 +32,29 @@ export const navigateParams = z.object({
     /** Internal route only ("/tasks"). External URLs are a phishing surface in a chat bubble. */
     href: z.string().startsWith("/", "href must be an internal route starting with /"),
 });
+/**
+ * The write half of dataSources (docs/data-connected-pages-design.md, "Data actions").
+ * A `dataSources` entry reads a database of pages; these three actions are the only way
+ * a spec may write to one. Each surface maps them onto its own real mutations — Nozio
+ * onto `documents.create` / `update` / `updateProperties` / `archive` — so a generated
+ * button or input performs a real CRUD op, never a local-state simulation of one.
+ */
+export const createPageParams = z.object({
+    /** The database (parent page) this row belongs to — bind to a dataSource's `parent`. */
+    parent: z.string().min(1),
+    title: z.string().min(1),
+    /** Seeds custom fields using the property names from that database's schema. */
+    properties: z.record(z.string(), z.unknown()).optional(),
+});
+export const updatePageParams = z.object({
+    id: z.string().min(1),
+    title: z.string().optional(),
+    /** Shallow-merged onto the page's existing properties — only passed keys change. */
+    properties: z.record(z.string(), z.unknown()).optional(),
+});
+export const deletePageParams = z.object({
+    id: z.string().min(1),
+});
 export const sharedActions = {
     answer: {
         params: answerParams,
@@ -44,5 +67,24 @@ export const sharedActions = {
         params: navigateParams,
         description: "Go to an internal page of the workspace, e.g. /tasks or /finance/debt. " +
             "Internal routes only — never an external URL.",
+    },
+    createPage: {
+        params: createPageParams,
+        description: "Create a new page (row) in a workspace database. `parent` must be the id of the " +
+            "database this row belongs to — bind it to the same id used in the page's " +
+            "`dataSources` entry, never a literal. `properties` seeds custom fields (e.g. " +
+            "status, priority) using that database's property schema. Use for an 'Add' button " +
+            "or form on a data-bound page.",
+    },
+    updatePage: {
+        params: updatePageParams,
+        description: "Edit an existing page's title and/or properties. `properties` is shallow-merged " +
+            "onto the page's current properties — pass only the keys that change. Use for " +
+            "inline edits, or to move a kanban card by patching its group-by property.",
+    },
+    deletePage: {
+        params: deletePageParams,
+        description: "Archive a page. Recoverable, never a hard delete — the row leaves the view but " +
+            "is not destroyed. Use for any 'delete' or 'remove' control on a generated page.",
     },
 };

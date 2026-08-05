@@ -1,6 +1,6 @@
 {
   "name": "@bedda/workspace-catalog",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "One component registry for the generative workspace: Nozio pages and Familiar chat render the same spec from this catalog.",
   "type": "module",
   "main": "./dist/index.js",

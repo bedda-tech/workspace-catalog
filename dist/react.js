@@ -68,6 +68,18 @@ export function createRegistry(handlers) {
                 if (params)
                     await handlers.navigate(params);
             },
+            createPage: async (params) => {
+                if (params)
+                    await handlers.createPage(params);
+            },
+            updatePage: async (params) => {
+                if (params)
+                    await handlers.updatePage(params);
+            },
+            deletePage: async (params) => {
+                if (params)
+                    await handlers.deletePage(params);
+            },
         },
     });
 }
@@ -78,4 +90,7 @@ export function createRegistry(handlers) {
 export const { registry: displayRegistry } = createRegistry({
     answer: (p) => console.warn("[workspace-catalog] answer ignored on display-only surface:", p.id),
     navigate: (p) => console.warn("[workspace-catalog] navigate ignored on display-only surface:", p.href),
+    createPage: (p) => console.warn("[workspace-catalog] createPage ignored on display-only surface:", p.parent),
+    updatePage: (p) => console.warn("[workspace-catalog] updatePage ignored on display-only surface:", p.id),
+    deletePage: (p) => console.warn("[workspace-catalog] deletePage ignored on display-only surface:", p.id),
 });

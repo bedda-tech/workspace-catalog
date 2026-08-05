@@ -19,13 +19,25 @@
 import { defineRegistry } from "@json-render/react";
 import { shadcnComponents as impl } from "@json-render/shadcn";
 import { catalog } from "./catalog.js";
-import type { AnswerParams, NavigateParams } from "./actions.js";
+import type {
+  AnswerParams,
+  NavigateParams,
+  CreatePageParams,
+  UpdatePageParams,
+  DeletePageParams,
+} from "./actions.js";
 
 export interface SurfaceHandlers {
   /** Commit a decision. Familiar: send `[ask:<id>] <json>` through chat. Nozio: write page data. */
   answer: (params: AnswerParams) => void | Promise<void>;
   /** Go to an internal route. Wire to the surface's router. */
   navigate: (params: NavigateParams) => void | Promise<void>;
+  /** Create a page/row in a database. Nozio: documents.create (+ updateProperties). */
+  createPage: (params: CreatePageParams) => void | Promise<void>;
+  /** Edit a page's title/properties, shallow-merged. Nozio: documents.update / updateProperties. */
+  updatePage: (params: UpdatePageParams) => void | Promise<void>;
+  /** Archive a page — recoverable, never a hard delete. Nozio: documents.archive. */
+  deletePage: (params: DeletePageParams) => void | Promise<void>;
 }
 
 export function createRegistry(handlers: SurfaceHandlers) {
@@ -75,6 +87,15 @@ export function createRegistry(handlers: SurfaceHandlers) {
       navigate: async (params) => {
         if (params) await handlers.navigate(params as NavigateParams);
       },
+      createPage: async (params) => {
+        if (params) await handlers.createPage(params as CreatePageParams);
+      },
+      updatePage: async (params) => {
+        if (params) await handlers.updatePage(params as UpdatePageParams);
+      },
+      deletePage: async (params) => {
+        if (params) await handlers.deletePage(params as DeletePageParams);
+      },
     },
   });
 }
@@ -86,4 +107,7 @@ export function createRegistry(handlers: SurfaceHandlers) {
 export const { registry: displayRegistry } = createRegistry({
   answer: (p) => console.warn("[workspace-catalog] answer ignored on display-only surface:", p.id),
   navigate: (p) => console.warn("[workspace-catalog] navigate ignored on display-only surface:", p.href),
+  createPage: (p) => console.warn("[workspace-catalog] createPage ignored on display-only surface:", p.parent),
+  updatePage: (p) => console.warn("[workspace-catalog] updatePage ignored on display-only surface:", p.id),
+  deletePage: (p) => console.warn("[workspace-catalog] deletePage ignored on display-only surface:", p.id),
 });

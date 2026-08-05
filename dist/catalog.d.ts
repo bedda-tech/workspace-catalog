@@ -560,6 +560,28 @@ export declare const catalog: import("@json-render/core").Catalog<{
             }, import("zod/v4/core").$strip>;
             readonly description: string;
         };
+        readonly createPage: {
+            readonly params: import("zod").ZodObject<{
+                parent: import("zod").ZodString;
+                title: import("zod").ZodString;
+                properties: import("zod").ZodOptional<import("zod").ZodRecord<import("zod").ZodString, import("zod").ZodUnknown>>;
+            }, import("zod/v4/core").$strip>;
+            readonly description: string;
+        };
+        readonly updatePage: {
+            readonly params: import("zod").ZodObject<{
+                id: import("zod").ZodString;
+                title: import("zod").ZodOptional<import("zod").ZodString>;
+                properties: import("zod").ZodOptional<import("zod").ZodRecord<import("zod").ZodString, import("zod").ZodUnknown>>;
+            }, import("zod/v4/core").$strip>;
+            readonly description: string;
+        };
+        readonly deletePage: {
+            readonly params: import("zod").ZodObject<{
+                id: import("zod").ZodString;
+            }, import("zod/v4/core").$strip>;
+            readonly description: string;
+        };
     };
 }>;
 /**
