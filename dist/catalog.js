@@ -19,6 +19,7 @@ import { defineCatalog } from "@json-render/core";
 import { schema } from "@json-render/react/schema";
 import { shadcnComponentDefinitions as defs } from "@json-render/shadcn";
 import { sharedActions } from "./actions.js";
+import { boardComponentDefinition } from "./board.js";
 export const catalog = defineCatalog(schema, {
     components: {
         // Layout
@@ -27,6 +28,8 @@ export const catalog = defineCatalog(schema, {
         Grid: defs.Grid,
         Tabs: defs.Tabs,
         Separator: defs.Separator,
+        // Data-connected
+        Board: boardComponentDefinition,
         // Data display
         Table: defs.Table,
         Heading: defs.Heading,

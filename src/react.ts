@@ -19,6 +19,7 @@
 import { defineRegistry } from "@json-render/react";
 import { shadcnComponents as impl } from "@json-render/shadcn";
 import { catalog } from "./catalog.js";
+import { Board } from "./board-react.js";
 import type {
   AnswerParams,
   NavigateParams,
@@ -43,6 +44,7 @@ export interface SurfaceHandlers {
 export function createRegistry(handlers: SurfaceHandlers) {
   return defineRegistry(catalog, {
     components: {
+      Board,
       Card: impl.Card,
       Stack: impl.Stack,
       Grid: impl.Grid,

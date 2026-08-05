@@ -117,6 +117,42 @@ export declare const catalog: import("@json-render/core").Catalog<{
             }, import("zod/v4/core").$strip>;
             description: string;
         };
+        Board: {
+            readonly props: import("zod").ZodObject<{
+                items: import("zod").ZodArray<import("zod").ZodObject<{
+                    id: import("zod").ZodString;
+                    title: import("zod").ZodNullable<import("zod").ZodString>;
+                    icon: import("zod").ZodNullable<import("zod").ZodString>;
+                    properties: import("zod").ZodNullable<import("zod").ZodRecord<import("zod").ZodString, import("zod").ZodUnknown>>;
+                }, import("zod/v4/core").$strip>>;
+                groupBy: import("zod").ZodString;
+                columns: import("zod").ZodNullable<import("zod").ZodArray<import("zod").ZodObject<{
+                    value: import("zod").ZodString;
+                    label: import("zod").ZodString;
+                }, import("zod/v4/core").$strip>>>;
+                cardTitle: import("zod").ZodString;
+                cardFields: import("zod").ZodNullable<import("zod").ZodArray<import("zod").ZodString>>;
+                activeCardId: import("zod").ZodNullable<import("zod").ZodString>;
+                moveTarget: import("zod").ZodNullable<import("zod").ZodString>;
+            }, import("zod/v4/core").$strip>;
+            readonly events: readonly ["move", "open", "add"];
+            readonly description: string;
+            readonly example: {
+                readonly groupBy: "status";
+                readonly columns: readonly [{
+                    readonly value: "todo";
+                    readonly label: "To do";
+                }, {
+                    readonly value: "doing";
+                    readonly label: "Doing";
+                }, {
+                    readonly value: "done";
+                    readonly label: "Done";
+                }];
+                readonly cardTitle: "title";
+                readonly cardFields: readonly ["priority"];
+            };
+        };
         Table: {
             props: import("zod").ZodObject<{
                 columns: import("zod").ZodArray<import("zod").ZodString>;

@@ -21,8 +21,8 @@ test("committed dist matches a fresh build of src", () => {
 test("the catalog still admits the full curated set", async () => {
   const { catalog, COMPONENT_NAMES } = await import("../dist/index.js");
   assert.ok(catalog, "catalog exists");
-  assert.equal(COMPONENT_NAMES.length, 36, "36 curated components — a change here must be deliberate");
-  for (const name of ["Card", "Table", "Dialog", "Input", "Button", "Tabs"]) {
+  assert.equal(COMPONENT_NAMES.length, 37, "37 curated components — a change here must be deliberate");
+  for (const name of ["Card", "Table", "Dialog", "Input", "Button", "Tabs", "Board"]) {
     assert.ok(COMPONENT_NAMES.includes(name), `${name} present`);
   }
 });
