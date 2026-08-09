@@ -35,10 +35,10 @@ test("catalog.validate() rejects a component prop that fails its own schema", as
   const { catalog } = await import("../dist/index.js");
   const spec = {
     root: "t1",
-    elements: { t1: el("Table", { columns: [{ key: "name", label: "Name" }], rows: [["a"]] }) },
+    elements: { t1: el("Table", { columns: [{ key: "name", label: "Name" }], items: [] }) },
   };
   const result = catalog.validate(spec);
-  assert.equal(result.success, false, "a Table.columns of {key,label} objects must fail — the schema is string[]");
+  assert.equal(result.success, false, "a Table.columns of {key,label} objects must fail — the schema wants {key,name,type,options}");
   assert.match(result.error.message, /columns/);
 });
 
@@ -58,7 +58,12 @@ test("catalog.validate() still accepts a correctly-shaped spec", async () => {
   const { catalog } = await import("../dist/index.js");
   const spec = {
     root: "t1",
-    elements: { t1: el("Table", { columns: ["Name"], rows: [["a"]] }) },
+    elements: {
+      t1: el("Table", {
+        columns: [{ key: "name", name: "Name", type: "text", options: null }],
+        items: [{ id: "1", title: "a", icon: null, properties: { name: "a" } }],
+      }),
+    },
   };
   assert.equal(catalog.validate(spec).success, true);
 });
@@ -67,7 +72,7 @@ test("catalog.validate() skips $-bound prop values — they're deferred, not typ
   const { catalog } = await import("../dist/index.js");
   const spec = {
     root: "t1",
-    elements: { t1: el("Table", { columns: { $state: "/columns/deals" }, rows: { $state: "/rows/deals" } }) },
+    elements: { t1: el("Table", { columns: { $state: "/schemas/deals" }, items: { $state: "/data/deals" } }) },
   };
   assert.equal(catalog.validate(spec).success, true);
 });

@@ -154,15 +154,43 @@ export declare const catalog: import("@json-render/core").Catalog<{
             };
         };
         Table: {
-            props: import("zod").ZodObject<{
-                columns: import("zod").ZodArray<import("zod").ZodString>;
-                rows: import("zod").ZodArray<import("zod").ZodArray<import("zod").ZodString>>;
-                caption: import("zod").ZodNullable<import("zod").ZodString>;
+            readonly props: import("zod").ZodObject<{
+                items: import("zod").ZodArray<import("zod").ZodObject<{
+                    id: import("zod").ZodString;
+                    title: import("zod").ZodNullable<import("zod").ZodString>;
+                    icon: import("zod").ZodNullable<import("zod").ZodString>;
+                    properties: import("zod").ZodNullable<import("zod").ZodRecord<import("zod").ZodString, import("zod").ZodUnknown>>;
+                }, import("zod/v4/core").$strip>>;
+                columns: import("zod").ZodNullable<import("zod").ZodArray<import("zod").ZodObject<{
+                    key: import("zod").ZodString;
+                    name: import("zod").ZodString;
+                    type: import("zod").ZodEnum<{
+                        number: "number";
+                        date: "date";
+                        text: "text";
+                        select: "select";
+                        multiSelect: "multiSelect";
+                        checkbox: "checkbox";
+                        person: "person";
+                        url: "url";
+                    }>;
+                    options: import("zod").ZodNullable<import("zod").ZodArray<import("zod").ZodObject<{
+                        value: import("zod").ZodString;
+                        label: import("zod").ZodNullable<import("zod").ZodString>;
+                    }, import("zod/v4/core").$strip>>>;
+                }, import("zod/v4/core").$strip>>>;
+                activeRowId: import("zod").ZodNullable<import("zod").ZodString>;
+                editValue: import("zod").ZodNullable<import("zod").ZodRecord<import("zod").ZodString, import("zod").ZodUnknown>>;
             }, import("zod/v4/core").$strip>;
-            description: string;
-            example: {
-                columns: string[];
-                rows: string[][];
+            readonly events: readonly ["editCell", "addRow", "deleteRow"];
+            readonly description: string;
+            readonly example: {
+                readonly items: {
+                    readonly $state: "/data/tasks";
+                };
+                readonly columns: {
+                    readonly $state: "/schemas/tasks";
+                };
             };
         };
         Heading: {

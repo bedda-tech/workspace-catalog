@@ -20,6 +20,7 @@ import { defineRegistry } from "@json-render/react";
 import { shadcnComponents as impl } from "@json-render/shadcn";
 import { catalog } from "./catalog.js";
 import { Board } from "./board-react.js";
+import { Table } from "./table-react.js";
 export function createRegistry(handlers) {
     return defineRegistry(catalog, {
         components: {
@@ -29,7 +30,7 @@ export function createRegistry(handlers) {
             Grid: impl.Grid,
             Tabs: impl.Tabs,
             Separator: impl.Separator,
-            Table: impl.Table,
+            Table,
             Heading: impl.Heading,
             Text: impl.Text,
             Badge: impl.Badge,
