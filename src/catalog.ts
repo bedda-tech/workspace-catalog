@@ -84,3 +84,79 @@ export const catalog = defineCatalog(schema, {
  * defineCatalog exposes this itself — alias it rather than re-deriving, so it cannot skew.
  */
 export const COMPONENT_NAMES: readonly string[] = catalog.componentNames;
+
+/**
+ * `catalog.validate()` (from @json-render/core's `defineCatalog`) checks spec structure
+ * and that every element's `type` names a real component — but it never runs a
+ * component's OWN prop schema (`catalog.data.components[type].props`) against the props
+ * an element was actually given. A `Table` given `{columns:[{key,label}]}` against a
+ * `columns: z.array(z.string())` schema passes `catalog.validate()` unchanged and only
+ * fails later, at render, throwing React #31 and white-screening the whole tree. That
+ * contradicts this catalog's own rule above: an invalid component "must fail visibly at
+ * validation, never silently at render." (Found 2026-08-08 building the workspace repo's
+ * composing agent; patched there first in the consumer, moved here so Nozio and the
+ * Familiar dashboard — which call the same `catalog.validate()` and never got that local
+ * patch — are covered by the one call they already make, with no call-site changes.)
+ *
+ * `@json-render/core` is vercel-labs/json-render, not a repo this package owns, so the
+ * fix is patched onto the catalog instance here rather than filed upstream there.
+ *
+ * Bound values (`{"$state": "/path"}`, or any other `$`-prefixed key) are deferred and
+ * skipped — they cannot be type-checked until resolved at render time.
+ */
+type ValidateResult = ReturnType<typeof catalog.validate>;
+
+const isBoundValue = (v: unknown): boolean =>
+  !!v && typeof v === "object" && !Array.isArray(v) &&
+  Object.keys(v as object).some((k) => k.startsWith("$"));
+
+interface PropSchema {
+  safeParse(v: unknown): { success: boolean; error?: { issues?: { message?: string }[] } };
+}
+interface ComponentDef {
+  props?: { shape?: Record<string, PropSchema> };
+  example?: unknown;
+}
+
+function checkComponentProps(spec: unknown): string | null {
+  const s = spec as { elements?: Record<string, { type: string; props?: Record<string, unknown> }> };
+  const componentDefs = (catalog as unknown as { data: { components: Record<string, ComponentDef> } })
+    .data.components;
+
+  for (const [id, el] of Object.entries(s.elements ?? {})) {
+    const def = componentDefs[el.type];
+    const shape = def?.props?.shape;
+    if (!shape) continue; // no prop schema registered for this type
+
+    const declared = Object.keys(shape);
+    const props = el.props ?? {};
+    const unknownProps = Object.keys(props).filter((k) => !declared.includes(k));
+    if (unknownProps.length) {
+      return `${el.type} "${id}": unknown prop(s) ${unknownProps.join(", ")}. ${el.type} accepts: ` +
+        `${declared.join(", ")}. Example: ${JSON.stringify(def?.example ?? {})}`;
+    }
+
+    for (const [key, value] of Object.entries(props)) {
+      const propSchema = shape[key];
+      if (!propSchema || isBoundValue(value)) continue;
+      const result = propSchema.safeParse(value);
+      if (!result.success) {
+        const why = result.error?.issues?.[0]?.message ?? "invalid value";
+        return `${el.type} "${id}": prop "${key}" ${why}. Correct shape for ${el.type}: ` +
+          `${JSON.stringify(def?.example ?? {})}`;
+      }
+    }
+  }
+  return null;
+}
+
+const structuralValidate = catalog.validate.bind(catalog);
+(catalog as { validate: typeof catalog.validate }).validate = ((spec: unknown): ValidateResult => {
+  const structural = structuralValidate(spec);
+  if (!structural.success) return structural;
+  const propError = checkComponentProps(spec);
+  if (propError) {
+    return { success: false, error: { message: propError } as ValidateResult["error"] } as ValidateResult;
+  }
+  return structural;
+}) as typeof catalog.validate;

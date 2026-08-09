@@ -82,3 +82,46 @@ export const catalog = defineCatalog(schema, {
  * defineCatalog exposes this itself — alias it rather than re-deriving, so it cannot skew.
  */
 export const COMPONENT_NAMES = catalog.componentNames;
+const isBoundValue = (v) => !!v && typeof v === "object" && !Array.isArray(v) &&
+    Object.keys(v).some((k) => k.startsWith("$"));
+function checkComponentProps(spec) {
+    const s = spec;
+    const componentDefs = catalog
+        .data.components;
+    for (const [id, el] of Object.entries(s.elements ?? {})) {
+        const def = componentDefs[el.type];
+        const shape = def?.props?.shape;
+        if (!shape)
+            continue; // no prop schema registered for this type
+        const declared = Object.keys(shape);
+        const props = el.props ?? {};
+        const unknownProps = Object.keys(props).filter((k) => !declared.includes(k));
+        if (unknownProps.length) {
+            return `${el.type} "${id}": unknown prop(s) ${unknownProps.join(", ")}. ${el.type} accepts: ` +
+                `${declared.join(", ")}. Example: ${JSON.stringify(def?.example ?? {})}`;
+        }
+        for (const [key, value] of Object.entries(props)) {
+            const propSchema = shape[key];
+            if (!propSchema || isBoundValue(value))
+                continue;
+            const result = propSchema.safeParse(value);
+            if (!result.success) {
+                const why = result.error?.issues?.[0]?.message ?? "invalid value";
+                return `${el.type} "${id}": prop "${key}" ${why}. Correct shape for ${el.type}: ` +
+                    `${JSON.stringify(def?.example ?? {})}`;
+            }
+        }
+    }
+    return null;
+}
+const structuralValidate = catalog.validate.bind(catalog);
+catalog.validate = ((spec) => {
+    const structural = structuralValidate(spec);
+    if (!structural.success)
+        return structural;
+    const propError = checkComponentProps(spec);
+    if (propError) {
+        return { success: false, error: { message: propError } };
+    }
+    return structural;
+});

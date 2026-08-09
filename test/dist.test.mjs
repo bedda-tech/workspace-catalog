@@ -26,3 +26,48 @@ test("the catalog still admits the full curated set", async () => {
     assert.ok(COMPONENT_NAMES.includes(name), `${name} present`);
   }
 });
+
+function el(type, props) {
+  return { type, props, children: [], visible: true };
+}
+
+test("catalog.validate() rejects a component prop that fails its own schema", async () => {
+  const { catalog } = await import("../dist/index.js");
+  const spec = {
+    root: "t1",
+    elements: { t1: el("Table", { columns: [{ key: "name", label: "Name" }], rows: [["a"]] }) },
+  };
+  const result = catalog.validate(spec);
+  assert.equal(result.success, false, "a Table.columns of {key,label} objects must fail — the schema is string[]");
+  assert.match(result.error.message, /columns/);
+});
+
+test("catalog.validate() rejects unknown props by name", async () => {
+  const { catalog } = await import("../dist/index.js");
+  const spec = {
+    root: "b1",
+    elements: { b1: el("Board", { data: [], titleKey: "name" }) },
+  };
+  const result = catalog.validate(spec);
+  assert.equal(result.success, false);
+  assert.match(result.error.message, /unknown prop/);
+  assert.match(result.error.message, /data/);
+});
+
+test("catalog.validate() still accepts a correctly-shaped spec", async () => {
+  const { catalog } = await import("../dist/index.js");
+  const spec = {
+    root: "t1",
+    elements: { t1: el("Table", { columns: ["Name"], rows: [["a"]] }) },
+  };
+  assert.equal(catalog.validate(spec).success, true);
+});
+
+test("catalog.validate() skips $-bound prop values — they're deferred, not type-checkable yet", async () => {
+  const { catalog } = await import("../dist/index.js");
+  const spec = {
+    root: "t1",
+    elements: { t1: el("Table", { columns: { $state: "/columns/deals" }, rows: { $state: "/rows/deals" } }) },
+  };
+  assert.equal(catalog.validate(spec).success, true);
+});
