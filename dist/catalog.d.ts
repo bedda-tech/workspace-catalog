@@ -182,7 +182,7 @@ export declare const catalog: import("@json-render/core").Catalog<{
                 activeRowId: import("zod").ZodNullable<import("zod").ZodString>;
                 editValue: import("zod").ZodNullable<import("zod").ZodRecord<import("zod").ZodString, import("zod").ZodUnknown>>;
             }, import("zod/v4/core").$strip>;
-            readonly events: readonly ["editCell", "addRow", "deleteRow"];
+            readonly events: readonly ["editCell", "addRow", "deleteRow", "open"];
             readonly description: string;
             readonly example: {
                 readonly items: {

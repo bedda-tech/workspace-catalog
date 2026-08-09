@@ -127,6 +127,11 @@ export function Table({ props, bindings, emit }: BaseComponentProps<TableProps>)
     emit("deleteRow");
   };
 
+  const openRow = (item: BoardItem) => {
+    setActiveRowId(item.id);
+    emit("open");
+  };
+
   if (items.length === 0 && columns.length === 0) {
     return <div className="text-sm text-muted-foreground">No rows yet.</div>;
   }
@@ -136,6 +141,7 @@ export function Table({ props, bindings, emit }: BaseComponentProps<TableProps>)
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr className="border-b border-border bg-muted/40">
+            <th className="w-8" />
             {columns.map((column) => (
               <th key={column.key} className="px-2 py-1.5 text-left font-medium text-muted-foreground">
                 {column.name}
@@ -147,6 +153,17 @@ export function Table({ props, bindings, emit }: BaseComponentProps<TableProps>)
         <tbody>
           {items.map((item) => (
             <tr key={item.id} className="border-b border-border last:border-0 hover:bg-muted/20">
+              <td className="px-2 py-1.5">
+                <button
+                  type="button"
+                  aria-label={`Open ${item.title ?? item.id}`}
+                  data-open-record={item.id}
+                  className="text-muted-foreground hover:text-foreground"
+                  onClick={() => openRow(item)}
+                >
+                  ⤢
+                </button>
+              </td>
               {columns.map((column) => {
                 const value = readCellValue(item, column.key);
                 const isEditing = editing?.rowId === item.id && editing.key === column.key;

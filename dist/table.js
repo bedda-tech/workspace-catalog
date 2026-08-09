@@ -50,12 +50,14 @@ export const tablePropsSchema = z.object({
 });
 export const tableComponentDefinition = {
     props: tablePropsSchema,
-    events: ["editCell", "addRow", "deleteRow"],
+    events: ["editCell", "addRow", "deleteRow", "open"],
     description: "Editable grid over a list of pages, usually a dataSources entry — click a cell to edit it in place " +
         "(the editor matches the column type: select shows a picker, date a date input, checkbox a checkbox), " +
-        "add a row from the control at the bottom, delete a row with its row control. Emits editCell " +
-        "{ activeRowId, editValue } when a cell commits a new value, addRow {} from the add-row control, and " +
-        "deleteRow { activeRowId } from a row's delete control. Table never mutates data itself — bind on.editCell " +
+        "add a row from the control at the bottom, delete a row with its row control, or open a row's detail " +
+        "view with its expand control. Emits editCell { activeRowId, editValue } when a cell commits a new " +
+        "value, addRow {} from the add-row control, deleteRow { activeRowId } from a row's delete control, and " +
+        "open { activeRowId } from a row's expand control (the host surface handles opening the detail view " +
+        "itself — on.open rarely needs to be bound). Table never mutates data itself — bind on.editCell " +
         "to updatePage (id: { \"$state\": <activeRowId path> }, properties: { \"$state\": <editValue path> }), " +
         "on.addRow to createPage (parent: \"<dataSourceName>\"), and on.deleteRow to deletePage " +
         "(id: { \"$state\": <activeRowId path> }).",

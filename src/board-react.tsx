@@ -84,6 +84,7 @@ export function Board({ props, bindings, emit }: BaseComponentProps<BoardProps>)
                   <button
                     type="button"
                     className="block w-full text-left text-sm font-medium"
+                    data-open-record={item.id}
                     onClick={() => openCard(item)}
                   >
                     {String(readCardField(item, props.cardTitle) ?? "")}

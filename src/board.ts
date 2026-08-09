@@ -55,10 +55,11 @@ export const boardComponentDefinition = {
   events: ["move", "open", "add"],
   description:
     "Kanban board over a list of pages, usually a dataSources entry. Groups items into columns by groupBy. " +
-    "Emits move { activeCardId, moveTarget } when a card is moved a column, open { activeCardId } when a card " +
-    "is opened, add { moveTarget } from a column's add control. Board never mutates data itself — bind on.move " +
+    "Emits move { activeCardId, moveTarget } when a card is moved a column, open { activeCardId } when a card's " +
+    "title is clicked (the host surface opens a record detail view itself — on.open rarely needs to be bound), " +
+    "add { moveTarget } from a column's add control. Board never mutates data itself — bind on.move " +
     "to updatePage (id: { \"$state\": <activeCardId path> }, properties: { [groupBy]: { \"$state\": <moveTarget path> } }), " +
-    "on.open to navigate, and on.add to createPage (properties: { [groupBy]: { \"$state\": <moveTarget path> } }).",
+    "and on.add to createPage (properties: { [groupBy]: { \"$state\": <moveTarget path> } }).",
   example: {
     groupBy: "status",
     columns: [

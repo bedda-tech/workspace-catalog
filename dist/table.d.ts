@@ -96,7 +96,7 @@ export declare const tableComponentDefinition: {
         activeRowId: z.ZodNullable<z.ZodString>;
         editValue: z.ZodNullable<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
     }, z.core.$strip>;
-    readonly events: readonly ["editCell", "addRow", "deleteRow"];
+    readonly events: readonly ["editCell", "addRow", "deleteRow", "open"];
     readonly description: string;
     readonly example: {
         readonly items: {

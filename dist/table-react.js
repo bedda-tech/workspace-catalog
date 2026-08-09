@@ -82,10 +82,14 @@ export function Table({ props, bindings, emit }) {
         setActiveRowId(item.id);
         emit("deleteRow");
     };
+    const openRow = (item) => {
+        setActiveRowId(item.id);
+        emit("open");
+    };
     if (items.length === 0 && columns.length === 0) {
         return _jsx("div", { className: "text-sm text-muted-foreground", children: "No rows yet." });
     }
-    return (_jsxs("div", { className: "overflow-x-auto rounded-md border border-border", children: [_jsxs("table", { className: "w-full border-collapse text-sm", children: [_jsx("thead", { children: _jsxs("tr", { className: "border-b border-border bg-muted/40", children: [columns.map((column) => (_jsx("th", { className: "px-2 py-1.5 text-left font-medium text-muted-foreground", children: column.name }, column.key))), _jsx("th", { className: "w-8" })] }) }), _jsx("tbody", { children: items.map((item) => (_jsxs("tr", { className: "border-b border-border last:border-0 hover:bg-muted/20", children: [columns.map((column) => {
+    return (_jsxs("div", { className: "overflow-x-auto rounded-md border border-border", children: [_jsxs("table", { className: "w-full border-collapse text-sm", children: [_jsx("thead", { children: _jsxs("tr", { className: "border-b border-border bg-muted/40", children: [_jsx("th", { className: "w-8" }), columns.map((column) => (_jsx("th", { className: "px-2 py-1.5 text-left font-medium text-muted-foreground", children: column.name }, column.key))), _jsx("th", { className: "w-8" })] }) }), _jsx("tbody", { children: items.map((item) => (_jsxs("tr", { className: "border-b border-border last:border-0 hover:bg-muted/20", children: [_jsx("td", { className: "px-2 py-1.5", children: _jsx("button", { type: "button", "aria-label": `Open ${item.title ?? item.id}`, "data-open-record": item.id, className: "text-muted-foreground hover:text-foreground", onClick: () => openRow(item), children: "\u2922" }) }), columns.map((column) => {
                                     const value = readCellValue(item, column.key);
                                     const isEditing = editing?.rowId === item.id && editing.key === column.key;
                                     if (column.type === "checkbox") {
