@@ -23,6 +23,21 @@ export const boardItemSchema = z.object({
 });
 export type BoardItem = z.infer<typeof boardItemSchema>;
 
+/**
+ * Shared by Board's cardFields and Table's cell rendering (table-react.tsx) so the same
+ * property, viewed in either component, reads the same way — task 6349: a euros "value"
+ * property rendered "42,000" in Table and raw "76000" in Board is the same bug reaching
+ * the reader as two different-looking numbers for one property type. Neither component
+ * carries full property-type metadata (Board's cardFields is just property-name strings),
+ * so this formats by the value's OWN runtime type rather than a declared schema type —
+ * cheap, and correct for the case that actually varies: numbers vs. everything else.
+ */
+export function formatPropertyValue(value: unknown): string {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "number") return value.toLocaleString();
+  return String(value);
+}
+
 export const boardPropsSchema = z.object({
   items: z
     .array(boardItemSchema)

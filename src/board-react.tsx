@@ -7,6 +7,7 @@
  */
 import type { BaseComponentProps } from "@json-render/react";
 import { useBoundProp } from "@json-render/react";
+import { formatPropertyValue } from "./board.js";
 import type { BoardItem, BoardProps } from "./board.js";
 
 function readCardField(item: BoardItem, field: string): unknown {
@@ -109,7 +110,7 @@ export function Board({ props, bindings, emit }: BaseComponentProps<BoardProps>)
                             key={field}
                             className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground"
                           >
-                            {String(value)}
+                            {formatPropertyValue(value)}
                           </span>
                         );
                       })}

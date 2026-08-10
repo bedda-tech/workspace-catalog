@@ -9,6 +9,7 @@
 import { useState } from "react";
 import type { BaseComponentProps } from "@json-render/react";
 import { useBoundProp } from "@json-render/react";
+import { formatPropertyValue } from "./board.js";
 import type { BoardItem } from "./board.js";
 import type { TableColumn, TableProps } from "./table.js";
 
@@ -42,7 +43,7 @@ function formatCell(column: TableColumn, value: unknown): string {
     const d = new Date(String(value));
     return Number.isNaN(d.getTime()) ? String(value) : d.toLocaleDateString();
   }
-  return String(value);
+  return formatPropertyValue(value);
 }
 
 function CellEditor({

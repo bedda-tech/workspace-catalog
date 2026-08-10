@@ -9,6 +9,7 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
  */
 import { useState } from "react";
 import { useBoundProp } from "@json-render/react";
+import { formatPropertyValue } from "./board.js";
 function readCellValue(item, key) {
     if (key === "id")
         return item.id;
@@ -42,7 +43,7 @@ function formatCell(column, value) {
         const d = new Date(String(value));
         return Number.isNaN(d.getTime()) ? String(value) : d.toLocaleDateString();
     }
-    return String(value);
+    return formatPropertyValue(value);
 }
 function CellEditor({ column, value, onCommit, onCancel, }) {
     if (column.type === "select") {

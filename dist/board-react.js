@@ -1,5 +1,6 @@
 import { jsxs as _jsxs, jsx as _jsx } from "react/jsx-runtime";
 import { useBoundProp } from "@json-render/react";
+import { formatPropertyValue } from "./board.js";
 function readCardField(item, field) {
     if (field === "id")
         return item.id;
@@ -59,7 +60,7 @@ export function Board({ props, bindings, emit }) {
                                         const value = readCardField(item, field);
                                         if (value === undefined || value === null || value === "")
                                             return null;
-                                        return (_jsx("span", { className: "rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground", children: String(value) }, field));
+                                        return (_jsx("span", { className: "rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground", children: formatPropertyValue(value) }, field));
                                     }) })), _jsxs("div", { className: "mt-2 flex justify-between", children: [_jsxs("button", { type: "button", disabled: columnIndex === 0, className: "text-xs text-muted-foreground disabled:opacity-30", "aria-label": `Move ${String(readCardField(item, props.cardTitle) ?? "card")} to ${columns[columnIndex - 1]?.label ?? "previous column"}`, onClick: () => moveCard(item, columns[columnIndex - 1]?.value), children: ["\u2190 ", columns[columnIndex - 1]?.label ?? ""] }), _jsxs("button", { type: "button", disabled: columnIndex === columns.length - 1, className: "text-xs text-muted-foreground disabled:opacity-30", "aria-label": `Move ${String(readCardField(item, props.cardTitle) ?? "card")} to ${columns[columnIndex + 1]?.label ?? "next column"}`, onClick: () => moveCard(item, columns[columnIndex + 1]?.value), children: [columns[columnIndex + 1]?.label ?? "", " \u2192"] })] })] }, item.id))) })] }, column.value));
         }) }));
 }
