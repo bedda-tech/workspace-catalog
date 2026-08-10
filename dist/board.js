@@ -28,12 +28,22 @@ export const boardItemSchema = z.object({
  * carries full property-type metadata (Board's cardFields is just property-name strings),
  * so this formats by the value's OWN runtime type rather than a declared schema type —
  * cheap, and correct for the case that actually varies: numbers vs. everything else.
+ *
+ * Task 6476: date-typed properties are stored as `Date.toISOString()` (convex/properties.ts),
+ * always exactly `YYYY-MM-DDTHH:mm:ss.sssZ` — a narrow, unambiguous pattern, so it can be
+ * detected from the raw string alone without threading column/schema type info into Board.
  */
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 export function formatPropertyValue(value) {
     if (value === null || value === undefined)
         return "";
     if (typeof value === "number")
         return value.toLocaleString();
+    if (typeof value === "string" && ISO_DATE_RE.test(value)) {
+        const d = new Date(value);
+        if (!Number.isNaN(d.getTime()))
+            return d.toLocaleDateString();
+    }
     return String(value);
 }
 export const boardPropsSchema = z.object({
