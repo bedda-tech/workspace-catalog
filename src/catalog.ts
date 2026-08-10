@@ -117,7 +117,26 @@ interface PropSchema {
 interface ComponentDef {
   props?: { shape?: Record<string, PropSchema> };
   example?: unknown;
+  /**
+   * Props that write a value via `{"$bindState":"<path>"}` immediately before the
+   * component emits an event (Board's activeCardId/moveTarget, Table's
+   * activeRowId/editValue — see board.ts/table.ts). These are declared `.nullable()` in
+   * their own zod schema (this catalog's spelling for "optional", since the write starts
+   * out null) — so a component can validly render with the prop simply ABSENT, and the
+   * per-key loop below never flags a key that never showed up in `props` at all. That gap
+   * is exactly how a Table composed without `activeRowId`/`editValue` used to pass
+   * validation, render fine, and then silently fail to write on the first cell edit — no
+   * error anywhere, because emit()'s bound action reads a `$state` path that was never
+   * wired (task 6512, follow-up to 6404's incomplete example-only fix). Listing a prop
+   * here makes its ABSENCE — or presence as a literal instead of a real binding — a
+   * validation failure, not a runtime no-op.
+   */
+  requiredBindStateProps?: string[];
 }
+
+const isBindStateValue = (v: unknown): boolean =>
+  !!v && typeof v === "object" && !Array.isArray(v) &&
+  "$bindState" in (v as object) && typeof (v as { $bindState?: unknown }).$bindState === "string";
 
 function checkComponentProps(spec: unknown): string | null {
   const s = spec as { elements?: Record<string, { type: string; props?: Record<string, unknown> }> };
@@ -145,6 +164,16 @@ function checkComponentProps(spec: unknown): string | null {
         const why = result.error?.issues?.[0]?.message ?? "invalid value";
         return `${el.type} "${id}": prop "${key}" ${why}. Correct shape for ${el.type}: ` +
           `${JSON.stringify(def?.example ?? {})}`;
+      }
+    }
+
+    for (const key of def?.requiredBindStateProps ?? []) {
+      if (!(key in props) || !isBindStateValue(props[key])) {
+        return `${el.type} "${id}": prop "${key}" must be bound with {"$bindState":"<path>"}. ` +
+          `${el.type} writes the acted-on value here immediately before emitting its edit ` +
+          `event — omitted or literal, the write has nowhere durable to land and the bound ` +
+          `action's matching {"$state":"<same path>"} read resolves to nothing, so the edit ` +
+          `visibly happens then silently reverts. Example: ${JSON.stringify(def?.example ?? {})}`;
       }
     }
   }

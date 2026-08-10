@@ -198,6 +198,7 @@ export declare const catalog: import("@json-render/core").Catalog<{
                     readonly $bindState: "/ui/tasks/editValue";
                 };
             };
+            readonly requiredBindStateProps: readonly ["activeRowId", "editValue"];
         };
         Heading: {
             props: import("zod").ZodObject<{

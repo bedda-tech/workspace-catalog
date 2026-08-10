@@ -85,6 +85,8 @@ export const catalog = defineCatalog(schema, {
 export const COMPONENT_NAMES = catalog.componentNames;
 const isBoundValue = (v) => !!v && typeof v === "object" && !Array.isArray(v) &&
     Object.keys(v).some((k) => k.startsWith("$"));
+const isBindStateValue = (v) => !!v && typeof v === "object" && !Array.isArray(v) &&
+    "$bindState" in v && typeof v.$bindState === "string";
 function checkComponentProps(spec) {
     const s = spec;
     const componentDefs = catalog
@@ -110,6 +112,15 @@ function checkComponentProps(spec) {
                 const why = result.error?.issues?.[0]?.message ?? "invalid value";
                 return `${el.type} "${id}": prop "${key}" ${why}. Correct shape for ${el.type}: ` +
                     `${JSON.stringify(def?.example ?? {})}`;
+            }
+        }
+        for (const key of def?.requiredBindStateProps ?? []) {
+            if (!(key in props) || !isBindStateValue(props[key])) {
+                return `${el.type} "${id}": prop "${key}" must be bound with {"$bindState":"<path>"}. ` +
+                    `${el.type} writes the acted-on value here immediately before emitting its edit ` +
+                    `event — omitted or literal, the write has nowhere durable to land and the bound ` +
+                    `action's matching {"$state":"<same path>"} read resolves to nothing, so the edit ` +
+                    `visibly happens then silently reverts. Example: ${JSON.stringify(def?.example ?? {})}`;
             }
         }
     }

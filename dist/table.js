@@ -60,11 +60,18 @@ export const tableComponentDefinition = {
         "itself — on.open rarely needs to be bound). Table never mutates data itself — bind on.editCell " +
         "to updatePage (id: { \"$state\": <activeRowId path> }, properties: { \"$state\": <editValue path> }), " +
         "on.addRow to createPage (parent: \"<dataSourceName>\"), and on.deleteRow to deletePage " +
-        "(id: { \"$state\": <activeRowId path> }).",
+        "(id: { \"$state\": <activeRowId path> }). REQUIRED: activeRowId and editValue must BOTH be " +
+        "{ \"$bindState\": \"<path>\" } — never omitted, never a literal. Without them the write has " +
+        "nowhere to land: a cell edit visibly changes then silently reverts on commit, with zero error.",
     example: {
         items: { $state: "/data/tasks" },
         columns: { $state: "/schemas/tasks" },
         activeRowId: { $bindState: "/ui/tasks/activeRowId" },
         editValue: { $bindState: "/ui/tasks/editValue" },
     },
+    // activeRowId/editValue MUST both be `{"$bindState":"<path>"}` — never omitted, never a
+    // literal — or a cell edit visibly happens then silently reverts (task 6512): Table
+    // writes into these two props right before emitting editCell/deleteRow, and the bound
+    // action's `{"$state":"<same path>"}` read has nothing to read if they weren't wired.
+    requiredBindStateProps: ["activeRowId", "editValue"],
 };

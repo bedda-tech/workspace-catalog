@@ -112,4 +112,5 @@ export declare const tableComponentDefinition: {
             readonly $bindState: "/ui/tasks/editValue";
         };
     };
+    readonly requiredBindStateProps: readonly ["activeRowId", "editValue"];
 };
