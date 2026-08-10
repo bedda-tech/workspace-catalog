@@ -64,5 +64,7 @@ export const tableComponentDefinition = {
     example: {
         items: { $state: "/data/tasks" },
         columns: { $state: "/schemas/tasks" },
+        activeRowId: { $bindState: "/ui/tasks/activeRowId" },
+        editValue: { $bindState: "/ui/tasks/editValue" },
     },
 };

@@ -191,6 +191,12 @@ export declare const catalog: import("@json-render/core").Catalog<{
                 readonly columns: {
                     readonly $state: "/schemas/tasks";
                 };
+                readonly activeRowId: {
+                    readonly $bindState: "/ui/tasks/activeRowId";
+                };
+                readonly editValue: {
+                    readonly $bindState: "/ui/tasks/editValue";
+                };
             };
         };
         Heading: {
