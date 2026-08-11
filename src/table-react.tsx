@@ -13,13 +13,19 @@ import { formatPropertyValue } from "./board.js";
 import type { BoardItem } from "./board.js";
 import type { TableColumn, TableProps } from "./table.js";
 
-function readCellValue(item: BoardItem, key: string): unknown {
+/**
+ * Exported so datatable-react.tsx (DataTableDetail) can reuse the exact same cell
+ * read/format/edit behavior instead of a second copy that inevitably drifts — see
+ * datatable.ts for why Detail is "Table's editing plus search/sort/pagination" rather
+ * than a component built from scratch.
+ */
+export function readCellValue(item: BoardItem, key: string): unknown {
   if (key === "id") return item.id;
   if (key === "title") return item.title;
   return item.properties?.[key];
 }
 
-function deriveColumns(items: BoardItem[]): TableColumn[] {
+export function deriveColumns(items: BoardItem[]): TableColumn[] {
   const seen = new Set<string>();
   for (const item of items) {
     for (const k of Object.keys(item.properties ?? {})) {
@@ -29,7 +35,7 @@ function deriveColumns(items: BoardItem[]): TableColumn[] {
   return Array.from(seen).map((key) => ({ key, name: key, type: "text" as const, options: null }));
 }
 
-function formatCell(column: TableColumn, value: unknown): string {
+export function formatCell(column: TableColumn, value: unknown): string {
   if (value === null || value === undefined || value === "") return "";
   if (column.type === "select" || column.type === "multiSelect") {
     const values = Array.isArray(value) ? value : [value];
@@ -46,7 +52,7 @@ function formatCell(column: TableColumn, value: unknown): string {
   return formatPropertyValue(value);
 }
 
-function CellEditor({
+export function CellEditor({
   column,
   value,
   onCommit,

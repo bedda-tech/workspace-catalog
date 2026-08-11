@@ -200,6 +200,104 @@ export declare const catalog: import("@json-render/core").Catalog<{
             };
             readonly requiredBindStateProps: readonly ["activeRowId", "editValue"];
         };
+        DataTablePreview: {
+            readonly props: import("zod").ZodObject<{
+                items: import("zod").ZodArray<import("zod").ZodObject<{
+                    id: import("zod").ZodString;
+                    title: import("zod").ZodNullable<import("zod").ZodString>;
+                    icon: import("zod").ZodNullable<import("zod").ZodString>;
+                    properties: import("zod").ZodNullable<import("zod").ZodRecord<import("zod").ZodString, import("zod").ZodUnknown>>;
+                }, import("zod/v4/core").$strip>>;
+                columns: import("zod").ZodNullable<import("zod").ZodArray<import("zod").ZodObject<{
+                    key: import("zod").ZodString;
+                    name: import("zod").ZodString;
+                    type: import("zod").ZodEnum<{
+                        number: "number";
+                        date: "date";
+                        text: "text";
+                        select: "select";
+                        multiSelect: "multiSelect";
+                        checkbox: "checkbox";
+                        person: "person";
+                        url: "url";
+                    }>;
+                    options: import("zod").ZodNullable<import("zod").ZodArray<import("zod").ZodObject<{
+                        value: import("zod").ZodString;
+                        label: import("zod").ZodNullable<import("zod").ZodString>;
+                    }, import("zod/v4/core").$strip>>>;
+                }, import("zod/v4/core").$strip>>>;
+                maxRows: import("zod").ZodNullable<import("zod").ZodNumber>;
+                activeRowId: import("zod").ZodNullable<import("zod").ZodString>;
+            }, import("zod/v4/core").$strip>;
+            readonly events: readonly ["open"];
+            readonly description: string;
+            readonly example: {
+                readonly items: {
+                    readonly $state: "/data/deals";
+                };
+                readonly columns: {
+                    readonly $state: "/schemas/deals";
+                };
+                readonly maxRows: 5;
+                readonly activeRowId: {
+                    readonly $bindState: "/ui/deals/previewActiveRowId";
+                };
+            };
+            readonly requiredBindStateProps: readonly ["activeRowId"];
+        };
+        DataTableDetail: {
+            readonly props: import("zod").ZodObject<{
+                items: import("zod").ZodArray<import("zod").ZodObject<{
+                    id: import("zod").ZodString;
+                    title: import("zod").ZodNullable<import("zod").ZodString>;
+                    icon: import("zod").ZodNullable<import("zod").ZodString>;
+                    properties: import("zod").ZodNullable<import("zod").ZodRecord<import("zod").ZodString, import("zod").ZodUnknown>>;
+                }, import("zod/v4/core").$strip>>;
+                columns: import("zod").ZodNullable<import("zod").ZodArray<import("zod").ZodObject<{
+                    key: import("zod").ZodString;
+                    name: import("zod").ZodString;
+                    type: import("zod").ZodEnum<{
+                        number: "number";
+                        date: "date";
+                        text: "text";
+                        select: "select";
+                        multiSelect: "multiSelect";
+                        checkbox: "checkbox";
+                        person: "person";
+                        url: "url";
+                    }>;
+                    options: import("zod").ZodNullable<import("zod").ZodArray<import("zod").ZodObject<{
+                        value: import("zod").ZodString;
+                        label: import("zod").ZodNullable<import("zod").ZodString>;
+                    }, import("zod/v4/core").$strip>>>;
+                }, import("zod/v4/core").$strip>>>;
+                searchable: import("zod").ZodNullable<import("zod").ZodBoolean>;
+                sortable: import("zod").ZodNullable<import("zod").ZodBoolean>;
+                pageSize: import("zod").ZodNullable<import("zod").ZodNumber>;
+                activeRowId: import("zod").ZodNullable<import("zod").ZodString>;
+                editValue: import("zod").ZodNullable<import("zod").ZodRecord<import("zod").ZodString, import("zod").ZodUnknown>>;
+            }, import("zod/v4/core").$strip>;
+            readonly events: readonly ["editCell", "addRow", "deleteRow"];
+            readonly description: string;
+            readonly example: {
+                readonly items: {
+                    readonly $state: "/data/deals";
+                };
+                readonly columns: {
+                    readonly $state: "/schemas/deals";
+                };
+                readonly searchable: true;
+                readonly sortable: true;
+                readonly pageSize: 20;
+                readonly activeRowId: {
+                    readonly $bindState: "/ui/deals/activeRowId";
+                };
+                readonly editValue: {
+                    readonly $bindState: "/ui/deals/editValue";
+                };
+            };
+            readonly requiredBindStateProps: readonly ["activeRowId", "editValue"];
+        };
         Heading: {
             props: import("zod").ZodObject<{
                 text: import("zod").ZodString;

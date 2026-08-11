@@ -21,6 +21,7 @@ import { shadcnComponents as impl } from "@json-render/shadcn";
 import { catalog } from "./catalog.js";
 import { Board } from "./board-react.js";
 import { Table } from "./table-react.js";
+import { DataTableDetail, DataTablePreview } from "./datatable-react.js";
 import type {
   AnswerParams,
   NavigateParams,
@@ -52,6 +53,8 @@ export function createRegistry(handlers: SurfaceHandlers) {
       Tabs: impl.Tabs,
       Separator: impl.Separator,
       Table,
+      DataTablePreview,
+      DataTableDetail,
       Heading: impl.Heading,
       Text: impl.Text,
       Badge: impl.Badge,

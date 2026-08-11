@@ -21,8 +21,8 @@ test("committed dist matches a fresh build of src", () => {
 test("the catalog still admits the full curated set", async () => {
   const { catalog, COMPONENT_NAMES } = await import("../dist/index.js");
   assert.ok(catalog, "catalog exists");
-  assert.equal(COMPONENT_NAMES.length, 37, "37 curated components — a change here must be deliberate");
-  for (const name of ["Card", "Table", "Dialog", "Input", "Button", "Tabs", "Board"]) {
+  assert.equal(COMPONENT_NAMES.length, 39, "39 curated components — a change here must be deliberate");
+  for (const name of ["Card", "Table", "Dialog", "Input", "Button", "Tabs", "Board", "DataTablePreview", "DataTableDetail"]) {
     assert.ok(COMPONENT_NAMES.includes(name), `${name} present`);
   }
 });
@@ -62,6 +62,8 @@ test("catalog.validate() still accepts a correctly-shaped spec", async () => {
       t1: el("Table", {
         columns: [{ key: "name", name: "Name", type: "text", options: null }],
         items: [{ id: "1", title: "a", icon: null, properties: { name: "a" } }],
+        activeRowId: { $bindState: "/ui/t1/activeRowId" },
+        editValue: { $bindState: "/ui/t1/editValue" },
       }),
     },
   };
@@ -72,7 +74,53 @@ test("catalog.validate() skips $-bound prop values — they're deferred, not typ
   const { catalog } = await import("../dist/index.js");
   const spec = {
     root: "t1",
-    elements: { t1: el("Table", { columns: { $state: "/schemas/deals" }, items: { $state: "/data/deals" } }) },
+    elements: {
+      t1: el("Table", {
+        columns: { $state: "/schemas/deals" },
+        items: { $state: "/data/deals" },
+        activeRowId: { $bindState: "/ui/t1/activeRowId" },
+        editValue: { $bindState: "/ui/t1/editValue" },
+      }),
+    },
   };
   assert.equal(catalog.validate(spec).success, true);
+});
+
+test("DataTablePreview/DataTableDetail accept a correctly-shaped, same-source spec", async () => {
+  const { catalog } = await import("../dist/index.js");
+  const spec = {
+    root: "root",
+    elements: {
+      root: { type: "Stack", props: {}, children: ["preview", "detail"], visible: true },
+      preview: el("DataTablePreview", {
+        items: { $state: "/data/deals" },
+        columns: { $state: "/schemas/deals" },
+        maxRows: 5,
+        activeRowId: { $bindState: "/ui/deals/previewActiveRowId" },
+      }),
+      detail: el("DataTableDetail", {
+        items: { $state: "/data/deals" },
+        columns: { $state: "/schemas/deals" },
+        searchable: true,
+        sortable: true,
+        pageSize: 20,
+        activeRowId: { $bindState: "/ui/deals/activeRowId" },
+        editValue: { $bindState: "/ui/deals/editValue" },
+      }),
+    },
+  };
+  assert.equal(catalog.validate(spec).success, true);
+});
+
+test("DataTablePreview requires activeRowId to be $bindState-bound", async () => {
+  const { catalog } = await import("../dist/index.js");
+  const spec = {
+    root: "p1",
+    elements: {
+      p1: el("DataTablePreview", { items: [], columns: [] }),
+    },
+  };
+  const result = catalog.validate(spec);
+  assert.equal(result.success, false);
+  assert.match(result.error.message, /activeRowId/);
 });

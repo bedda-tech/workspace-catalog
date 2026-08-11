@@ -10,14 +10,20 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useState } from "react";
 import { useBoundProp } from "@json-render/react";
 import { formatPropertyValue } from "./board.js";
-function readCellValue(item, key) {
+/**
+ * Exported so datatable-react.tsx (DataTableDetail) can reuse the exact same cell
+ * read/format/edit behavior instead of a second copy that inevitably drifts — see
+ * datatable.ts for why Detail is "Table's editing plus search/sort/pagination" rather
+ * than a component built from scratch.
+ */
+export function readCellValue(item, key) {
     if (key === "id")
         return item.id;
     if (key === "title")
         return item.title;
     return item.properties?.[key];
 }
-function deriveColumns(items) {
+export function deriveColumns(items) {
     const seen = new Set();
     for (const item of items) {
         for (const k of Object.keys(item.properties ?? {})) {
@@ -27,7 +33,7 @@ function deriveColumns(items) {
     }
     return Array.from(seen).map((key) => ({ key, name: key, type: "text", options: null }));
 }
-function formatCell(column, value) {
+export function formatCell(column, value) {
     if (value === null || value === undefined || value === "")
         return "";
     if (column.type === "select" || column.type === "multiSelect") {
@@ -45,7 +51,7 @@ function formatCell(column, value) {
     }
     return formatPropertyValue(value);
 }
-function CellEditor({ column, value, onCommit, onCancel, }) {
+export function CellEditor({ column, value, onCommit, onCancel, }) {
     if (column.type === "select") {
         return (
         // eslint-disable-next-line jsx-a11y/no-autofocus

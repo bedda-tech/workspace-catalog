@@ -21,6 +21,7 @@ import { shadcnComponentDefinitions as defs } from "@json-render/shadcn";
 import { sharedActions } from "./actions.js";
 import { boardComponentDefinition } from "./board.js";
 import { tableComponentDefinition } from "./table.js";
+import { dataTableDetailComponentDefinition, dataTablePreviewComponentDefinition } from "./datatable.js";
 
 export const catalog = defineCatalog(schema, {
   components: {
@@ -33,6 +34,8 @@ export const catalog = defineCatalog(schema, {
     // Data-connected
     Board: boardComponentDefinition,
     Table: tableComponentDefinition,
+    DataTablePreview: dataTablePreviewComponentDefinition,
+    DataTableDetail: dataTableDetailComponentDefinition,
     // Data display
     Heading: defs.Heading,
     Text: defs.Text,
