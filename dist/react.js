@@ -22,9 +22,11 @@ import { catalog } from "./catalog.js";
 import { Board } from "./board-react.js";
 import { Table } from "./table-react.js";
 import { DataTableDetail, DataTablePreview } from "./datatable-react.js";
+import { PageHeader } from "./pageheader-react.js";
 export function createRegistry(handlers) {
     return defineRegistry(catalog, {
         components: {
+            PageHeader,
             Board,
             Card: impl.Card,
             Stack: impl.Stack,

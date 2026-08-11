@@ -22,6 +22,7 @@ import { catalog } from "./catalog.js";
 import { Board } from "./board-react.js";
 import { Table } from "./table-react.js";
 import { DataTableDetail, DataTablePreview } from "./datatable-react.js";
+import { PageHeader } from "./pageheader-react.js";
 import type {
   AnswerParams,
   NavigateParams,
@@ -46,6 +47,7 @@ export interface SurfaceHandlers {
 export function createRegistry(handlers: SurfaceHandlers) {
   return defineRegistry(catalog, {
     components: {
+      PageHeader,
       Board,
       Card: impl.Card,
       Stack: impl.Stack,

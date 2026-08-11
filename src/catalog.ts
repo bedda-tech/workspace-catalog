@@ -22,10 +22,12 @@ import { sharedActions } from "./actions.js";
 import { boardComponentDefinition } from "./board.js";
 import { tableComponentDefinition } from "./table.js";
 import { dataTableDetailComponentDefinition, dataTablePreviewComponentDefinition } from "./datatable.js";
+import { pageHeaderComponentDefinition } from "./pageheader.js";
 
 export const catalog = defineCatalog(schema, {
   components: {
     // Layout
+    PageHeader: pageHeaderComponentDefinition,
     Card: defs.Card,
     Stack: defs.Stack,
     Grid: defs.Grid,

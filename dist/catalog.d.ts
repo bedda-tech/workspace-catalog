@@ -22,6 +22,27 @@ export declare const catalog: import("@json-render/core").Catalog<{
     }>;
 }, {
     components: {
+        PageHeader: {
+            readonly props: import("zod").ZodObject<{
+                title: import("zod").ZodString;
+                subtitle: import("zod").ZodNullable<import("zod").ZodString>;
+                badgeText: import("zod").ZodNullable<import("zod").ZodString>;
+                badgeVariant: import("zod").ZodNullable<import("zod").ZodEnum<{
+                    default: "default";
+                    secondary: "secondary";
+                    destructive: "destructive";
+                    outline: "outline";
+                }>>;
+            }, import("zod/v4/core").$strip>;
+            readonly slots: string[];
+            readonly description: string;
+            readonly example: {
+                readonly title: "Barberist launch tracker";
+                readonly subtitle: "Pilot rollout across 3 locations";
+                readonly badgeText: "Live";
+                readonly badgeVariant: "secondary";
+            };
+        };
         Card: {
             props: import("zod").ZodObject<{
                 title: import("zod").ZodNullable<import("zod").ZodString>;
