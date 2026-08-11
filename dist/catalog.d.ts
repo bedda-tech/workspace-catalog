@@ -153,6 +153,14 @@ export declare const catalog: import("@json-render/core").Catalog<{
                 }, import("zod/v4/core").$strip>>>;
                 cardTitle: import("zod").ZodString;
                 cardFields: import("zod").ZodNullable<import("zod").ZodArray<import("zod").ZodString>>;
+                cardFieldSchemas: import("zod").ZodNullable<import("zod").ZodArray<import("zod").ZodObject<{
+                    key: import("zod").ZodString;
+                    options: import("zod").ZodNullable<import("zod").ZodArray<import("zod").ZodObject<{
+                        value: import("zod").ZodString;
+                        label: import("zod").ZodNullable<import("zod").ZodString>;
+                        color: import("zod").ZodNullable<import("zod").ZodString>;
+                    }, import("zod/v4/core").$strip>>>;
+                }, import("zod/v4/core").$strip>>>;
                 activeCardId: import("zod").ZodNullable<import("zod").ZodString>;
                 moveTarget: import("zod").ZodNullable<import("zod").ZodString>;
             }, import("zod/v4/core").$strip>;
@@ -172,6 +180,9 @@ export declare const catalog: import("@json-render/core").Catalog<{
                 }];
                 readonly cardTitle: "title";
                 readonly cardFields: readonly ["priority"];
+                readonly cardFieldSchemas: {
+                    readonly $state: "/schemas/tasks";
+                };
             };
         };
         Table: {
@@ -198,6 +209,7 @@ export declare const catalog: import("@json-render/core").Catalog<{
                     options: import("zod").ZodNullable<import("zod").ZodArray<import("zod").ZodObject<{
                         value: import("zod").ZodString;
                         label: import("zod").ZodNullable<import("zod").ZodString>;
+                        color: import("zod").ZodNullable<import("zod").ZodString>;
                     }, import("zod/v4/core").$strip>>>;
                 }, import("zod/v4/core").$strip>>>;
                 activeRowId: import("zod").ZodNullable<import("zod").ZodString>;
@@ -245,6 +257,7 @@ export declare const catalog: import("@json-render/core").Catalog<{
                     options: import("zod").ZodNullable<import("zod").ZodArray<import("zod").ZodObject<{
                         value: import("zod").ZodString;
                         label: import("zod").ZodNullable<import("zod").ZodString>;
+                        color: import("zod").ZodNullable<import("zod").ZodString>;
                     }, import("zod/v4/core").$strip>>>;
                 }, import("zod/v4/core").$strip>>>;
                 maxRows: import("zod").ZodNullable<import("zod").ZodNumber>;
@@ -290,6 +303,7 @@ export declare const catalog: import("@json-render/core").Catalog<{
                     options: import("zod").ZodNullable<import("zod").ZodArray<import("zod").ZodObject<{
                         value: import("zod").ZodString;
                         label: import("zod").ZodNullable<import("zod").ZodString>;
+                        color: import("zod").ZodNullable<import("zod").ZodString>;
                     }, import("zod/v4/core").$strip>>>;
                 }, import("zod/v4/core").$strip>>>;
                 searchable: import("zod").ZodNullable<import("zod").ZodBoolean>;

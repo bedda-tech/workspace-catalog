@@ -9,7 +9,7 @@ import type { BaseComponentProps } from "@json-render/react";
 import { useBoundProp } from "@json-render/react";
 import type { BoardItem } from "./board.js";
 import type { DataTableDetailProps, DataTablePreviewProps, TableColumn } from "./datatable.js";
-import { CellEditor, deriveColumns, formatCell, readCellValue, TableSkeleton } from "./table-react.js";
+import { CellEditor, deriveColumns, formatCell, readCellValue, renderCell, TableSkeleton } from "./table-react.js";
 
 const DEFAULT_PREVIEW_ROWS = 5;
 
@@ -60,7 +60,7 @@ export function DataTablePreview({ props, bindings, emit, loading }: BaseCompone
             >
               {columns.map((column) => (
                 <td key={column.key} className="px-2 py-1.5">
-                  {formatCell(column, readCellValue(item, column.key)) || (
+                  {renderCell(column, readCellValue(item, column.key)) || (
                     <span className="text-muted-foreground">—</span>
                   )}
                 </td>
@@ -240,7 +240,7 @@ export function DataTableDetail({ props, bindings, emit, loading }: BaseComponen
                           className="block min-h-[1.25rem] w-full text-left"
                           onClick={() => setEditing({ rowId: item.id, key: column.key })}
                         >
-                          {formatCell(column, value) || <span className="text-muted-foreground">—</span>}
+                          {renderCell(column, value) || <span className="text-muted-foreground">—</span>}
                         </button>
                       )}
                     </td>

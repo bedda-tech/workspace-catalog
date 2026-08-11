@@ -19,7 +19,7 @@
  * board.ts uses for activeCardId/moveTarget, generalized to a dynamic key.
  */
 import { z } from "zod";
-import { boardItemSchema } from "./board.js";
+import { boardItemSchema, selectOptionSchema } from "./board.js";
 
 export const tableColumnSchema = z.object({
   key: z.string(),
@@ -28,9 +28,13 @@ export const tableColumnSchema = z.object({
     .enum(["text", "number", "select", "multiSelect", "date", "checkbox", "person", "url"])
     .describe("Which editor the cell renders: select/multiSelect show a picker, date a date input, checkbox a checkbox, others a text/number field."),
   options: z
-    .array(z.object({ value: z.string(), label: z.string().nullable() }))
+    .array(selectOptionSchema)
     .nullable()
-    .describe("Legal values for select/multiSelect columns, e.g. [{\"value\":\"todo\",\"label\":\"To Do\"}]."),
+    .describe(
+      "Legal values for select/multiSelect columns, e.g. [{\"value\":\"todo\",\"label\":\"To Do\",\"color\":\"blue\"}]. " +
+        "\"color\" is optional (default/gray/brown/orange/yellow/green/blue/purple/pink/red) and renders that option's " +
+        "cell as a colored badge instead of plain text — set it for severity/priority/status-shaped columns.",
+    ),
 });
 export type TableColumn = z.infer<typeof tableColumnSchema>;
 
@@ -68,7 +72,11 @@ export const tableComponentDefinition = {
     "on.addRow to createPage (parent: \"<dataSourceName>\"), and on.deleteRow to deletePage " +
     "(id: { \"$state\": <activeRowId path> }). REQUIRED: activeRowId and editValue must BOTH be " +
     "{ \"$bindState\": \"<path>\" } — never omitted, never a literal. Without them the write has " +
-    "nowhere to land: a cell edit visibly changes then silently reverts on commit, with zero error.",
+    "nowhere to land: a cell edit visibly changes then silently reverts on commit, with zero error. " +
+    "A select/multiSelect column with no per-option \"color\" set renders every value as the same " +
+    "flat neutral pill — set one for severity/priority/status-shaped columns (e.g. low=gray, " +
+    "medium=yellow, high=orange, critical=red) so values read as visually distinct, not just " +
+    "distinguishable by their text.",
   example: {
     items: { $state: "/data/tasks" },
     columns: { $state: "/schemas/tasks" },

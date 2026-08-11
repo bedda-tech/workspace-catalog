@@ -6,10 +6,11 @@
  * step needed); add row/delete row are single-click controls. No drag-to-reorder rows,
  * no multi-cell selection — ships the Notion-parity behavior the task asks for first.
  */
+import type { ReactNode } from "react";
 import { useState } from "react";
 import type { BaseComponentProps } from "@json-render/react";
 import { useBoundProp } from "@json-render/react";
-import { formatPropertyValue } from "./board.js";
+import { formatPropertyValue, selectOptionColorClass } from "./board.js";
 import type { BoardItem } from "./board.js";
 import type { TableColumn, TableProps } from "./table.js";
 
@@ -50,6 +51,35 @@ export function formatCell(column: TableColumn, value: unknown): string {
     return Number.isNaN(d.getTime()) ? String(value) : d.toLocaleDateString();
   }
   return formatPropertyValue(value);
+}
+
+/**
+ * Read-view cell rendering — a select/multiSelect column renders each value as a colored
+ * badge (falling back to a flat neutral pill when the option has no "color") instead of the
+ * plain text formatCell produces; every other type stays plain text. Kept separate from
+ * formatCell, which stays a pure string (search/filter in datatable-react.tsx needs a
+ * string to match against, not JSX).
+ */
+export function renderCell(column: TableColumn, value: unknown): ReactNode {
+  if (column.type !== "select" && column.type !== "multiSelect") return formatCell(column, value);
+  if (value === null || value === undefined || value === "") return "";
+  const values = Array.isArray(value) ? value : [value];
+  const options = column.options ?? [];
+  return (
+    <span className="flex flex-wrap gap-1">
+      {values.map((v) => {
+        const option = options.find((o) => o.value === v);
+        return (
+          <span
+            key={String(v)}
+            className={`rounded px-1.5 py-0.5 text-xs font-medium ${selectOptionColorClass(option?.color)}`}
+          >
+            {option?.label ?? String(v)}
+          </span>
+        );
+      })}
+    </span>
+  );
 }
 
 /** Placeholder rows shown while the bound data source's first read is still in flight. */
@@ -232,7 +262,7 @@ export function Table({ props, bindings, emit, loading }: BaseComponentProps<Tab
                         className="block min-h-[1.25rem] w-full text-left"
                         onClick={() => setEditing({ rowId: item.id, key: column.key })}
                       >
-                        {formatCell(column, value) || <span className="text-muted-foreground">—</span>}
+                        {renderCell(column, value) || <span className="text-muted-foreground">—</span>}
                       </button>
                     )}
                   </td>

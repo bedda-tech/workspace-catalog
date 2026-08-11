@@ -35,6 +35,7 @@ export declare const tableColumnSchema: z.ZodObject<{
     options: z.ZodNullable<z.ZodArray<z.ZodObject<{
         value: z.ZodString;
         label: z.ZodNullable<z.ZodString>;
+        color: z.ZodNullable<z.ZodString>;
     }, z.core.$strip>>>;
 }, z.core.$strip>;
 export type TableColumn = z.infer<typeof tableColumnSchema>;
@@ -61,6 +62,7 @@ export declare const tablePropsSchema: z.ZodObject<{
         options: z.ZodNullable<z.ZodArray<z.ZodObject<{
             value: z.ZodString;
             label: z.ZodNullable<z.ZodString>;
+            color: z.ZodNullable<z.ZodString>;
         }, z.core.$strip>>>;
     }, z.core.$strip>>>;
     activeRowId: z.ZodNullable<z.ZodString>;
@@ -91,6 +93,7 @@ export declare const tableComponentDefinition: {
             options: z.ZodNullable<z.ZodArray<z.ZodObject<{
                 value: z.ZodString;
                 label: z.ZodNullable<z.ZodString>;
+                color: z.ZodNullable<z.ZodString>;
             }, z.core.$strip>>>;
         }, z.core.$strip>>>;
         activeRowId: z.ZodNullable<z.ZodString>;

@@ -45,6 +45,7 @@ export declare const dataTablePreviewPropsSchema: z.ZodObject<{
         options: z.ZodNullable<z.ZodArray<z.ZodObject<{
             value: z.ZodString;
             label: z.ZodNullable<z.ZodString>;
+            color: z.ZodNullable<z.ZodString>;
         }, z.core.$strip>>>;
     }, z.core.$strip>>>;
     maxRows: z.ZodNullable<z.ZodNumber>;
@@ -75,6 +76,7 @@ export declare const dataTablePreviewComponentDefinition: {
             options: z.ZodNullable<z.ZodArray<z.ZodObject<{
                 value: z.ZodString;
                 label: z.ZodNullable<z.ZodString>;
+                color: z.ZodNullable<z.ZodString>;
             }, z.core.$strip>>>;
         }, z.core.$strip>>>;
         maxRows: z.ZodNullable<z.ZodNumber>;
@@ -119,6 +121,7 @@ export declare const dataTableDetailPropsSchema: z.ZodObject<{
         options: z.ZodNullable<z.ZodArray<z.ZodObject<{
             value: z.ZodString;
             label: z.ZodNullable<z.ZodString>;
+            color: z.ZodNullable<z.ZodString>;
         }, z.core.$strip>>>;
     }, z.core.$strip>>>;
     searchable: z.ZodNullable<z.ZodBoolean>;
@@ -152,6 +155,7 @@ export declare const dataTableDetailComponentDefinition: {
             options: z.ZodNullable<z.ZodArray<z.ZodObject<{
                 value: z.ZodString;
                 label: z.ZodNullable<z.ZodString>;
+                color: z.ZodNullable<z.ZodString>;
             }, z.core.$strip>>>;
         }, z.core.$strip>>>;
         searchable: z.ZodNullable<z.ZodBoolean>;

@@ -24,6 +24,62 @@ export const boardItemSchema = z.object({
 export type BoardItem = z.infer<typeof boardItemSchema>;
 
 /**
+ * Shared by Table's column options (table.ts) and Board's cardFieldSchemas below — one
+ * option shape for both, so a color set on a select property (convex/properties.ts
+ * PropertyOption, or imported straight from Notion's own select color) means the same
+ * thing and renders the same way everywhere that property shows up. "color" is Notion's
+ * own palette name (see SELECT_COLOR_CLASS) rather than a raw CSS value: a closed enum a
+ * validator can check, and it lets a Notion-imported schema's colors work unmodified
+ * (convex/notion.ts already copies o.color through on import — task 6593 found nothing
+ * downstream ever read it).
+ */
+export const selectOptionSchema = z.object({
+  value: z.string(),
+  label: z.string().nullable(),
+  color: z.string().nullable(),
+});
+export type SelectOption = z.infer<typeof selectOptionSchema>;
+
+/**
+ * Notion's own select-color palette (default/gray/brown/orange/yellow/green/blue/purple/
+ * pink/red) — reused verbatim rather than inventing our own names, so an imported schema's
+ * colors need no translation. Values are full literal Tailwind class strings (not built by
+ * interpolation) so the workspace app's `@source` scan of this package's dist output picks
+ * them up — see workspace repo src/styles.css for why interpolated classes silently vanish.
+ * Tuned for the app's single dark theme (background ~#0b1220): no dark: variants needed.
+ */
+export const SELECT_COLOR_CLASS: Record<string, string> = {
+  default: "bg-muted text-muted-foreground",
+  gray: "bg-slate-500/15 text-slate-300",
+  brown: "bg-amber-800/25 text-amber-500",
+  orange: "bg-orange-500/15 text-orange-400",
+  yellow: "bg-yellow-500/15 text-yellow-300",
+  green: "bg-emerald-500/15 text-emerald-400",
+  blue: "bg-blue-500/15 text-blue-400",
+  purple: "bg-purple-500/15 text-purple-400",
+  pink: "bg-pink-500/15 text-pink-400",
+  red: "bg-red-500/15 text-red-400",
+};
+
+/** Falls back to the plain neutral pill an uncolored option already rendered as. */
+export function selectOptionColorClass(color: string | null | undefined): string {
+  if (!color) return SELECT_COLOR_CLASS.default;
+  return SELECT_COLOR_CLASS[color] ?? SELECT_COLOR_CLASS.default;
+}
+
+/** Board's cardFields is a bare list of property-name strings (see below) — this is the
+ * optional companion that gives cardFields access to each field's select options, so a
+ * severity/priority/status-shaped card badge can be colored instead of a flat neutral
+ * pill for every value. Bind to the SAME "/schemas/<name>" path Table's `columns` prop
+ * uses (task 6593) — extra PropertyDef fields (name/type/required/defaultValue) beyond
+ * key/options are simply ignored here. */
+export const cardFieldSchemaEntrySchema = z.object({
+  key: z.string(),
+  options: z.array(selectOptionSchema).nullable(),
+});
+export type CardFieldSchemaEntry = z.infer<typeof cardFieldSchemaEntrySchema>;
+
+/**
  * Shared by Board's cardFields and Table's cell rendering (table-react.tsx) so the same
  * property, viewed in either component, reads the same way — task 6349: a euros "value"
  * property rendered "42,000" in Table and raw "76000" in Board is the same bug reaching
@@ -64,6 +120,15 @@ export const boardPropsSchema = z.object({
     .array(z.string())
     .nullable()
     .describe("Extra property names shown as small badges on each card."),
+  cardFieldSchemas: z
+    .array(cardFieldSchemaEntrySchema)
+    .nullable()
+    .describe(
+      "Property definitions for cardFields, so select-type badges can be colored instead of " +
+        "one flat neutral pill for every value. Bind the WHOLE array to that dataSource's " +
+        "schema: { \"$state\": \"/schemas/<name>\" } — same array Table's columns prop binds. " +
+        "Set this whenever any cardFields entry is select/multiSelect-typed.",
+    ),
   activeCardId: z
     .string()
     .nullable()
@@ -84,7 +149,11 @@ export const boardComponentDefinition = {
     "title is clicked (the host surface opens a record detail view itself — on.open rarely needs to be bound), " +
     "add { moveTarget } from a column's add control. Board never mutates data itself — bind on.move " +
     "to updatePage (id: { \"$state\": <activeCardId path> }, properties: { [groupBy]: { \"$state\": <moveTarget path> } }), " +
-    "and on.add to createPage (properties: { [groupBy]: { \"$state\": <moveTarget path> } }).",
+    "and on.add to createPage (properties: { [groupBy]: { \"$state\": <moveTarget path> } }). " +
+    "A cardFields badge for a select/multiSelect property renders a flat neutral pill unless " +
+    "cardFieldSchemas is also bound — set both together whenever a cardFields entry is a " +
+    "severity/priority/status-shaped select, so critical reads as visually distinct from low " +
+    "at a glance instead of only by its text label.",
   example: {
     groupBy: "status",
     columns: [
@@ -94,5 +163,6 @@ export const boardComponentDefinition = {
     ],
     cardTitle: "title",
     cardFields: ["priority"],
+    cardFieldSchemas: { $state: "/schemas/tasks" },
   },
 } as const;

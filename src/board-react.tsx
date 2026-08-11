@@ -7,14 +7,20 @@
  */
 import type { BaseComponentProps } from "@json-render/react";
 import { useBoundProp } from "@json-render/react";
-import { formatPropertyValue } from "./board.js";
-import type { BoardItem, BoardProps } from "./board.js";
+import { formatPropertyValue, selectOptionColorClass } from "./board.js";
+import type { BoardItem, BoardProps, CardFieldSchemaEntry } from "./board.js";
 
 function readCardField(item: BoardItem, field: string): unknown {
   if (field === "id") return item.id;
   if (field === "title") return item.title;
   if (field === "icon") return item.icon;
   return item.properties?.[field];
+}
+
+/** The matching select option for a cardField's raw value, if cardFieldSchemas declared one. */
+function cardFieldOption(schemas: CardFieldSchemaEntry[], field: string, value: unknown) {
+  const options = schemas.find((s) => s.key === field)?.options ?? [];
+  return options.find((o) => o.value === String(value));
 }
 
 function deriveColumns(items: BoardItem[], groupBy: string): { value: string; label: string }[] {
@@ -55,6 +61,7 @@ export function Board({ props, bindings, emit, loading }: BaseComponentProps<Boa
   const items = props.items ?? [];
   const columns = props.columns && props.columns.length > 0 ? props.columns : deriveColumns(items, props.groupBy);
   const cardFields = props.cardFields ?? [];
+  const cardFieldSchemas = props.cardFieldSchemas ?? [];
 
   if (columns.length === 0) {
     return <div className="text-sm text-muted-foreground">No cards yet.</div>;
@@ -138,12 +145,13 @@ export function Board({ props, bindings, emit, loading }: BaseComponentProps<Boa
                       {cardFields.map((field) => {
                         const value = readCardField(item, field);
                         if (value === undefined || value === null || value === "") return null;
+                        const option = cardFieldOption(cardFieldSchemas, field, value);
                         return (
                           <span
                             key={field}
-                            className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground"
+                            className={`rounded px-1.5 py-0.5 text-xs font-medium ${selectOptionColorClass(option?.color)}`}
                           >
-                            {formatPropertyValue(value)}
+                            {option?.label ?? formatPropertyValue(value)}
                           </span>
                         );
                       })}

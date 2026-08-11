@@ -1,15 +1,7 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-/**
- * Table's React implementation. Kept separate from table.ts (React-free) the same way
- * board.ts/board-react.tsx split — the root export stays server-safe.
- *
- * v1: click a cell to edit it in place (checkbox toggles immediately, no click-to-edit
- * step needed); add row/delete row are single-click controls. No drag-to-reorder rows,
- * no multi-cell selection — ships the Notion-parity behavior the task asks for first.
- */
 import { useState } from "react";
 import { useBoundProp } from "@json-render/react";
-import { formatPropertyValue } from "./board.js";
+import { formatPropertyValue, selectOptionColorClass } from "./board.js";
 /**
  * Exported so datatable-react.tsx (DataTableDetail) can reuse the exact same cell
  * read/format/edit behavior instead of a second copy that inevitably drifts — see
@@ -50,6 +42,25 @@ export function formatCell(column, value) {
         return Number.isNaN(d.getTime()) ? String(value) : d.toLocaleDateString();
     }
     return formatPropertyValue(value);
+}
+/**
+ * Read-view cell rendering — a select/multiSelect column renders each value as a colored
+ * badge (falling back to a flat neutral pill when the option has no "color") instead of the
+ * plain text formatCell produces; every other type stays plain text. Kept separate from
+ * formatCell, which stays a pure string (search/filter in datatable-react.tsx needs a
+ * string to match against, not JSX).
+ */
+export function renderCell(column, value) {
+    if (column.type !== "select" && column.type !== "multiSelect")
+        return formatCell(column, value);
+    if (value === null || value === undefined || value === "")
+        return "";
+    const values = Array.isArray(value) ? value : [value];
+    const options = column.options ?? [];
+    return (_jsx("span", { className: "flex flex-wrap gap-1", children: values.map((v) => {
+            const option = options.find((o) => o.value === v);
+            return (_jsx("span", { className: `rounded px-1.5 py-0.5 text-xs font-medium ${selectOptionColorClass(option?.color)}`, children: option?.label ?? String(v) }, String(v)));
+        }) }));
 }
 /** Placeholder rows shown while the bound data source's first read is still in flight. */
 const SKELETON_ROWS = 4;
@@ -109,6 +120,6 @@ export function Table({ props, bindings, emit, loading }) {
                                         if (column.type === "checkbox") {
                                             return (_jsx("td", { className: "px-2 py-1.5", children: _jsx("input", { type: "checkbox", "aria-label": `${column.name} for ${item.title ?? item.id}`, checked: Boolean(value), onChange: (e) => commitCell(item, column, e.target.checked) }) }, column.key));
                                         }
-                                        return (_jsx("td", { className: "px-2 py-1.5", children: isEditing ? (_jsx(CellEditor, { column: column, value: value, onCommit: (v) => commitCell(item, column, v), onCancel: () => setEditing(null) })) : (_jsx("button", { type: "button", "aria-label": `Edit ${column.name} for ${item.title ?? item.id}`, className: "block min-h-[1.25rem] w-full text-left", onClick: () => setEditing({ rowId: item.id, key: column.key }), children: formatCell(column, value) || _jsx("span", { className: "text-muted-foreground", children: "\u2014" }) })) }, column.key));
+                                        return (_jsx("td", { className: "px-2 py-1.5", children: isEditing ? (_jsx(CellEditor, { column: column, value: value, onCommit: (v) => commitCell(item, column, v), onCancel: () => setEditing(null) })) : (_jsx("button", { type: "button", "aria-label": `Edit ${column.name} for ${item.title ?? item.id}`, className: "block min-h-[1.25rem] w-full text-left", onClick: () => setEditing({ rowId: item.id, key: column.key }), children: renderCell(column, value) || _jsx("span", { className: "text-muted-foreground", children: "\u2014" }) })) }, column.key));
                                     }), _jsx("td", { className: "px-2 py-1.5 text-right", children: _jsx("button", { type: "button", "aria-label": `Delete row ${item.title ?? item.id}`, className: "text-muted-foreground hover:text-destructive", onClick: () => deleteRow(item), children: "\u00D7" }) })] }, item.id)))] })] }), _jsx("button", { type: "button", "aria-label": "Add row", className: "w-full border-t border-border px-2 py-1.5 text-left text-sm text-muted-foreground hover:bg-muted/30", onClick: () => emit("addRow"), children: "+ Add row" })] }));
 }
