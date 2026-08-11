@@ -9,11 +9,13 @@ import type { BaseComponentProps } from "@json-render/react";
 import { useBoundProp } from "@json-render/react";
 import type { BoardItem } from "./board.js";
 import type { DataTableDetailProps, DataTablePreviewProps, TableColumn } from "./datatable.js";
-import { CellEditor, deriveColumns, formatCell, readCellValue } from "./table-react.js";
+import { CellEditor, deriveColumns, formatCell, readCellValue, TableSkeleton } from "./table-react.js";
 
 const DEFAULT_PREVIEW_ROWS = 5;
 
-export function DataTablePreview({ props, bindings, emit }: BaseComponentProps<DataTablePreviewProps>) {
+export function DataTablePreview({ props, bindings, emit, loading }: BaseComponentProps<DataTablePreviewProps>) {
+  if (loading) return <TableSkeleton />;
+
   const allItems = props.items ?? [];
   const columns = props.columns && props.columns.length > 0 ? props.columns : deriveColumns(allItems);
   const maxRows = props.maxRows && props.maxRows > 0 ? props.maxRows : DEFAULT_PREVIEW_ROWS;
@@ -26,7 +28,7 @@ export function DataTablePreview({ props, bindings, emit }: BaseComponentProps<D
     emit("open");
   };
 
-  if (items.length === 0 && columns.length === 0) {
+  if (columns.length === 0) {
     return <div className="text-sm text-muted-foreground">No rows yet.</div>;
   }
 
@@ -43,6 +45,13 @@ export function DataTablePreview({ props, bindings, emit }: BaseComponentProps<D
           </tr>
         </thead>
         <tbody>
+          {items.length === 0 && (
+            <tr>
+              <td colSpan={columns.length} className="px-2 py-3 text-sm text-muted-foreground">
+                No rows yet.
+              </td>
+            </tr>
+          )}
           {items.map((item) => (
             <tr
               key={item.id}
@@ -96,7 +105,9 @@ function matchesSearch(item: BoardItem, columns: TableColumn[], query: string): 
   return columns.some((column) => formatCell(column, readCellValue(item, column.key)).toLowerCase().includes(q));
 }
 
-export function DataTableDetail({ props, bindings, emit }: BaseComponentProps<DataTableDetailProps>) {
+export function DataTableDetail({ props, bindings, emit, loading }: BaseComponentProps<DataTableDetailProps>) {
+  if (loading) return <TableSkeleton />;
+
   const allItems = props.items ?? [];
   const columns = props.columns && props.columns.length > 0 ? props.columns : deriveColumns(allItems);
   const searchable = props.searchable ?? true;
@@ -141,7 +152,7 @@ export function DataTableDetail({ props, bindings, emit }: BaseComponentProps<Da
     });
   };
 
-  if (allItems.length === 0 && columns.length === 0) {
+  if (columns.length === 0) {
     return <div className="text-sm text-muted-foreground">No rows yet.</div>;
   }
 
@@ -188,6 +199,13 @@ export function DataTableDetail({ props, bindings, emit }: BaseComponentProps<Da
             </tr>
           </thead>
           <tbody>
+            {items.length === 0 && (
+              <tr>
+                <td colSpan={columns.length + 2} className="px-2 py-3 text-sm text-muted-foreground">
+                  {allItems.length === 0 ? "No rows yet." : "No matching rows."}
+                </td>
+              </tr>
+            )}
             {items.map((item) => (
               <tr key={item.id} className="border-b border-border last:border-0 hover:bg-muted/20">
                 <td className="px-2 py-1.5" />

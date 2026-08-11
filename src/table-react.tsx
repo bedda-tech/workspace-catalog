@@ -52,6 +52,27 @@ export function formatCell(column: TableColumn, value: unknown): string {
   return formatPropertyValue(value);
 }
 
+/** Placeholder rows shown while the bound data source's first read is still in flight. */
+const SKELETON_ROWS = 4;
+
+export function TableSkeleton() {
+  return (
+    <div className="overflow-x-auto rounded-md border border-border" aria-hidden="true">
+      <table className="w-full border-collapse text-sm">
+        <tbody>
+          {Array.from({ length: SKELETON_ROWS }, (_, i) => (
+            <tr key={i} className="border-b border-border last:border-0">
+              <td className="px-2 py-2.5">
+                <div className="h-4 w-full max-w-xs animate-pulse rounded bg-muted" />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export function CellEditor({
   column,
   value,
@@ -113,7 +134,9 @@ export function CellEditor({
   );
 }
 
-export function Table({ props, bindings, emit }: BaseComponentProps<TableProps>) {
+export function Table({ props, bindings, emit, loading }: BaseComponentProps<TableProps>) {
+  if (loading) return <TableSkeleton />;
+
   const items = props.items ?? [];
   const columns = props.columns && props.columns.length > 0 ? props.columns : deriveColumns(items);
 
@@ -139,7 +162,7 @@ export function Table({ props, bindings, emit }: BaseComponentProps<TableProps>)
     emit("open");
   };
 
-  if (items.length === 0 && columns.length === 0) {
+  if (columns.length === 0) {
     return <div className="text-sm text-muted-foreground">No rows yet.</div>;
   }
 
@@ -158,6 +181,13 @@ export function Table({ props, bindings, emit }: BaseComponentProps<TableProps>)
           </tr>
         </thead>
         <tbody>
+          {items.length === 0 && (
+            <tr>
+              <td colSpan={columns.length + 2} className="px-2 py-3 text-sm text-muted-foreground">
+                No rows yet.
+              </td>
+            </tr>
+          )}
           {items.map((item) => (
             <tr key={item.id} className="border-b border-border last:border-0 hover:bg-muted/20">
               <td className="px-2 py-1.5">

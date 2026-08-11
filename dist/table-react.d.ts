@@ -10,10 +10,11 @@ import type { TableColumn, TableProps } from "./table.js";
 export declare function readCellValue(item: BoardItem, key: string): unknown;
 export declare function deriveColumns(items: BoardItem[]): TableColumn[];
 export declare function formatCell(column: TableColumn, value: unknown): string;
+export declare function TableSkeleton(): import("react").JSX.Element;
 export declare function CellEditor({ column, value, onCommit, onCancel, }: {
     column: TableColumn;
     value: unknown;
     onCommit: (value: unknown) => void;
     onCancel: () => void;
 }): import("react").JSX.Element;
-export declare function Table({ props, bindings, emit }: BaseComponentProps<TableProps>): import("react").JSX.Element;
+export declare function Table({ props, bindings, emit, loading }: BaseComponentProps<TableProps>): import("react").JSX.Element;

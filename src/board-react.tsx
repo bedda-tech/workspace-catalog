@@ -27,10 +27,38 @@ function deriveColumns(items: BoardItem[], groupBy: string): { value: string; la
   return Array.from(seen).map((value) => ({ value, label: value }));
 }
 
-export function Board({ props, bindings, emit }: BaseComponentProps<BoardProps>) {
+/** Placeholder columns shown while the bound data source's first read is still in flight. */
+const SKELETON_COLUMNS = 3;
+const SKELETON_CARDS = 2;
+
+function BoardSkeleton() {
+  return (
+    <div className="board-columns flex gap-4 overflow-x-auto pb-2" aria-hidden="true">
+      {Array.from({ length: SKELETON_COLUMNS }, (_, i) => (
+        <div
+          key={i}
+          className="board-column flex w-72 shrink-0 flex-col gap-2 rounded-lg border border-border bg-muted/30 p-2"
+        >
+          <div className="h-4 w-16 animate-pulse rounded bg-muted" />
+          {Array.from({ length: SKELETON_CARDS }, (_, j) => (
+            <div key={j} className="h-14 animate-pulse rounded-md border border-border bg-muted/60" />
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function Board({ props, bindings, emit, loading }: BaseComponentProps<BoardProps>) {
+  if (loading) return <BoardSkeleton />;
+
   const items = props.items ?? [];
   const columns = props.columns && props.columns.length > 0 ? props.columns : deriveColumns(items, props.groupBy);
   const cardFields = props.cardFields ?? [];
+
+  if (columns.length === 0) {
+    return <div className="text-sm text-muted-foreground">No cards yet.</div>;
+  }
   // A narrow canvas pane (e.g. chat open at 1280px) fits ~3 of the default 288px
   // columns before scrolling; a 5+ stage board (task 6367) reads as clipped/broken
   // past that. Past 3 columns, shrink to a compact width so more stay legible before
@@ -90,6 +118,11 @@ export function Board({ props, bindings, emit }: BaseComponentProps<BoardProps>)
               </button>
             </div>
             <div className="flex flex-col gap-2">
+              {cards.length === 0 && (
+                <div className="rounded-md border border-dashed border-border p-2 text-xs text-muted-foreground">
+                  No cards
+                </div>
+              )}
               {cards.map((item) => (
                 <div key={item.id} className="rounded-md border border-border bg-background p-2 shadow-sm">
                   <button

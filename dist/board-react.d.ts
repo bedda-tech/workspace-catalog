@@ -7,4 +7,4 @@
  */
 import type { BaseComponentProps } from "@json-render/react";
 import type { BoardProps } from "./board.js";
-export declare function Board({ props, bindings, emit }: BaseComponentProps<BoardProps>): import("react").JSX.Element;
+export declare function Board({ props, bindings, emit, loading }: BaseComponentProps<BoardProps>): import("react").JSX.Element;

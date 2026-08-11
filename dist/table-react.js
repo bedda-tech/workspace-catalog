@@ -51,6 +51,11 @@ export function formatCell(column, value) {
     }
     return formatPropertyValue(value);
 }
+/** Placeholder rows shown while the bound data source's first read is still in flight. */
+const SKELETON_ROWS = 4;
+export function TableSkeleton() {
+    return (_jsx("div", { className: "overflow-x-auto rounded-md border border-border", "aria-hidden": "true", children: _jsx("table", { className: "w-full border-collapse text-sm", children: _jsx("tbody", { children: Array.from({ length: SKELETON_ROWS }, (_, i) => (_jsx("tr", { className: "border-b border-border last:border-0", children: _jsx("td", { className: "px-2 py-2.5", children: _jsx("div", { className: "h-4 w-full max-w-xs animate-pulse rounded bg-muted" }) }) }, i))) }) }) }));
+}
 export function CellEditor({ column, value, onCommit, onCancel, }) {
     if (column.type === "select") {
         return (
@@ -73,7 +78,9 @@ export function CellEditor({ column, value, onCommit, onCancel, }) {
                 onCancel();
         } }));
 }
-export function Table({ props, bindings, emit }) {
+export function Table({ props, bindings, emit, loading }) {
+    if (loading)
+        return _jsx(TableSkeleton, {});
     const items = props.items ?? [];
     const columns = props.columns && props.columns.length > 0 ? props.columns : deriveColumns(items);
     const [, setActiveRowId] = useBoundProp(props.activeRowId, bindings?.activeRowId);
@@ -93,15 +100,15 @@ export function Table({ props, bindings, emit }) {
         setActiveRowId(item.id);
         emit("open");
     };
-    if (items.length === 0 && columns.length === 0) {
+    if (columns.length === 0) {
         return _jsx("div", { className: "text-sm text-muted-foreground", children: "No rows yet." });
     }
-    return (_jsxs("div", { className: "overflow-x-auto rounded-md border border-border", children: [_jsxs("table", { className: "w-full border-collapse text-sm", children: [_jsx("thead", { children: _jsxs("tr", { className: "border-b border-border bg-muted/40", children: [_jsx("th", { className: "w-8" }), columns.map((column) => (_jsx("th", { className: "px-2 py-1.5 text-left font-medium text-muted-foreground", children: column.name }, column.key))), _jsx("th", { className: "w-8" })] }) }), _jsx("tbody", { children: items.map((item) => (_jsxs("tr", { className: "border-b border-border last:border-0 hover:bg-muted/20", children: [_jsx("td", { className: "px-2 py-1.5", children: _jsx("button", { type: "button", "aria-label": `Open ${item.title ?? item.id}`, "data-open-record": item.id, className: "text-muted-foreground hover:text-foreground", onClick: () => openRow(item), children: "\u2922" }) }), columns.map((column) => {
-                                    const value = readCellValue(item, column.key);
-                                    const isEditing = editing?.rowId === item.id && editing.key === column.key;
-                                    if (column.type === "checkbox") {
-                                        return (_jsx("td", { className: "px-2 py-1.5", children: _jsx("input", { type: "checkbox", "aria-label": `${column.name} for ${item.title ?? item.id}`, checked: Boolean(value), onChange: (e) => commitCell(item, column, e.target.checked) }) }, column.key));
-                                    }
-                                    return (_jsx("td", { className: "px-2 py-1.5", children: isEditing ? (_jsx(CellEditor, { column: column, value: value, onCommit: (v) => commitCell(item, column, v), onCancel: () => setEditing(null) })) : (_jsx("button", { type: "button", "aria-label": `Edit ${column.name} for ${item.title ?? item.id}`, className: "block min-h-[1.25rem] w-full text-left", onClick: () => setEditing({ rowId: item.id, key: column.key }), children: formatCell(column, value) || _jsx("span", { className: "text-muted-foreground", children: "\u2014" }) })) }, column.key));
-                                }), _jsx("td", { className: "px-2 py-1.5 text-right", children: _jsx("button", { type: "button", "aria-label": `Delete row ${item.title ?? item.id}`, className: "text-muted-foreground hover:text-destructive", onClick: () => deleteRow(item), children: "\u00D7" }) })] }, item.id))) })] }), _jsx("button", { type: "button", "aria-label": "Add row", className: "w-full border-t border-border px-2 py-1.5 text-left text-sm text-muted-foreground hover:bg-muted/30", onClick: () => emit("addRow"), children: "+ Add row" })] }));
+    return (_jsxs("div", { className: "overflow-x-auto rounded-md border border-border", children: [_jsxs("table", { className: "w-full border-collapse text-sm", children: [_jsx("thead", { children: _jsxs("tr", { className: "border-b border-border bg-muted/40", children: [_jsx("th", { className: "w-8" }), columns.map((column) => (_jsx("th", { className: "px-2 py-1.5 text-left font-medium text-muted-foreground", children: column.name }, column.key))), _jsx("th", { className: "w-8" })] }) }), _jsxs("tbody", { children: [items.length === 0 && (_jsx("tr", { children: _jsx("td", { colSpan: columns.length + 2, className: "px-2 py-3 text-sm text-muted-foreground", children: "No rows yet." }) })), items.map((item) => (_jsxs("tr", { className: "border-b border-border last:border-0 hover:bg-muted/20", children: [_jsx("td", { className: "px-2 py-1.5", children: _jsx("button", { type: "button", "aria-label": `Open ${item.title ?? item.id}`, "data-open-record": item.id, className: "text-muted-foreground hover:text-foreground", onClick: () => openRow(item), children: "\u2922" }) }), columns.map((column) => {
+                                        const value = readCellValue(item, column.key);
+                                        const isEditing = editing?.rowId === item.id && editing.key === column.key;
+                                        if (column.type === "checkbox") {
+                                            return (_jsx("td", { className: "px-2 py-1.5", children: _jsx("input", { type: "checkbox", "aria-label": `${column.name} for ${item.title ?? item.id}`, checked: Boolean(value), onChange: (e) => commitCell(item, column, e.target.checked) }) }, column.key));
+                                        }
+                                        return (_jsx("td", { className: "px-2 py-1.5", children: isEditing ? (_jsx(CellEditor, { column: column, value: value, onCommit: (v) => commitCell(item, column, v), onCancel: () => setEditing(null) })) : (_jsx("button", { type: "button", "aria-label": `Edit ${column.name} for ${item.title ?? item.id}`, className: "block min-h-[1.25rem] w-full text-left", onClick: () => setEditing({ rowId: item.id, key: column.key }), children: formatCell(column, value) || _jsx("span", { className: "text-muted-foreground", children: "\u2014" }) })) }, column.key));
+                                    }), _jsx("td", { className: "px-2 py-1.5 text-right", children: _jsx("button", { type: "button", "aria-label": `Delete row ${item.title ?? item.id}`, className: "text-muted-foreground hover:text-destructive", onClick: () => deleteRow(item), children: "\u00D7" }) })] }, item.id)))] })] }), _jsx("button", { type: "button", "aria-label": "Add row", className: "w-full border-t border-border px-2 py-1.5 text-left text-sm text-muted-foreground hover:bg-muted/30", onClick: () => emit("addRow"), children: "+ Add row" })] }));
 }
