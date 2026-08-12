@@ -1,7 +1,7 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useState } from "react";
 import { useBoundProp } from "@json-render/react";
-import { formatPropertyValue, selectOptionColorClass } from "./board.js";
+import { formatPropertyValue, resolveMemberDisplay, selectOptionColorClass } from "./board.js";
 /**
  * Exported so datatable-react.tsx (DataTableDetail) can reuse the exact same cell
  * read/format/edit behavior instead of a second copy that inevitably drifts — see
@@ -25,9 +25,11 @@ export function deriveColumns(items) {
     }
     return Array.from(seen).map((key) => ({ key, name: key, type: "text", options: null }));
 }
-export function formatCell(column, value) {
+export function formatCell(column, value, members) {
     if (value === null || value === undefined || value === "")
         return "";
+    if (column.type === "assignee" || column.type === "person")
+        return resolveMemberDisplay(members, value);
     if (column.type === "select" || column.type === "multiSelect") {
         const values = Array.isArray(value) ? value : [value];
         const options = column.options ?? [];
@@ -50,9 +52,9 @@ export function formatCell(column, value) {
  * formatCell, which stays a pure string (search/filter in datatable-react.tsx needs a
  * string to match against, not JSX).
  */
-export function renderCell(column, value) {
+export function renderCell(column, value, members) {
     if (column.type !== "select" && column.type !== "multiSelect")
-        return formatCell(column, value);
+        return formatCell(column, value, members);
     if (value === null || value === undefined || value === "")
         return "";
     const values = Array.isArray(value) ? value : [value];
@@ -94,6 +96,7 @@ export function Table({ props, bindings, emit, loading }) {
         return _jsx(TableSkeleton, {});
     const items = props.items ?? [];
     const columns = props.columns && props.columns.length > 0 ? props.columns : deriveColumns(items);
+    const members = props.members ?? [];
     const [, setActiveRowId] = useBoundProp(props.activeRowId, bindings?.activeRowId);
     const [, setEditValue] = useBoundProp(props.editValue, bindings?.editValue);
     const [editing, setEditing] = useState(null);
@@ -120,6 +123,6 @@ export function Table({ props, bindings, emit, loading }) {
                                         if (column.type === "checkbox") {
                                             return (_jsx("td", { className: "px-2 py-1.5", children: _jsx("input", { type: "checkbox", "aria-label": `${column.name} for ${item.title ?? item.id}`, checked: Boolean(value), onChange: (e) => commitCell(item, column, e.target.checked) }) }, column.key));
                                         }
-                                        return (_jsx("td", { className: "px-2 py-1.5", children: isEditing ? (_jsx(CellEditor, { column: column, value: value, onCommit: (v) => commitCell(item, column, v), onCancel: () => setEditing(null) })) : (_jsx("button", { type: "button", "aria-label": `Edit ${column.name} for ${item.title ?? item.id}`, className: "block min-h-[1.25rem] w-full text-left", onClick: () => setEditing({ rowId: item.id, key: column.key }), children: renderCell(column, value) || _jsx("span", { className: "text-muted-foreground", children: "\u2014" }) })) }, column.key));
+                                        return (_jsx("td", { className: "px-2 py-1.5", children: isEditing ? (_jsx(CellEditor, { column: column, value: value, onCommit: (v) => commitCell(item, column, v), onCancel: () => setEditing(null) })) : (_jsx("button", { type: "button", "aria-label": `Edit ${column.name} for ${item.title ?? item.id}`, className: "block min-h-[1.25rem] w-full text-left", onClick: () => setEditing({ rowId: item.id, key: column.key }), children: renderCell(column, value, members) || _jsx("span", { className: "text-muted-foreground", children: "\u2014" }) })) }, column.key));
                                     }), _jsx("td", { className: "px-2 py-1.5 text-right", children: _jsx("button", { type: "button", "aria-label": `Delete row ${item.title ?? item.id}`, className: "text-muted-foreground hover:text-destructive", onClick: () => deleteRow(item), children: "\u00D7" }) })] }, item.id)))] })] }), _jsx("button", { type: "button", "aria-label": "Add row", className: "w-full border-t border-border px-2 py-1.5 text-left text-sm text-muted-foreground hover:bg-muted/30", onClick: () => emit("addRow"), children: "+ Add row" })] }));
 }

@@ -155,6 +155,7 @@ export declare const catalog: import("@json-render/core").Catalog<{
                 cardFields: import("zod").ZodNullable<import("zod").ZodArray<import("zod").ZodString>>;
                 cardFieldSchemas: import("zod").ZodNullable<import("zod").ZodArray<import("zod").ZodObject<{
                     key: import("zod").ZodString;
+                    type: import("zod").ZodNullable<import("zod").ZodString>;
                     options: import("zod").ZodNullable<import("zod").ZodArray<import("zod").ZodObject<{
                         value: import("zod").ZodString;
                         label: import("zod").ZodNullable<import("zod").ZodString>;
@@ -163,6 +164,14 @@ export declare const catalog: import("@json-render/core").Catalog<{
                 }, import("zod/v4/core").$strip>>>;
                 activeCardId: import("zod").ZodNullable<import("zod").ZodString>;
                 moveTarget: import("zod").ZodNullable<import("zod").ZodString>;
+                members: import("zod").ZodNullable<import("zod").ZodArray<import("zod").ZodObject<{
+                    userId: import("zod").ZodString;
+                    name: import("zod").ZodString;
+                    kind: import("zod").ZodNullable<import("zod").ZodEnum<{
+                        human: "human";
+                        agent: "agent";
+                    }>>;
+                }, import("zod/v4/core").$strip>>>;
             }, import("zod/v4/core").$strip>;
             readonly events: readonly ["move", "open", "add"];
             readonly description: string;
@@ -179,9 +188,12 @@ export declare const catalog: import("@json-render/core").Catalog<{
                     readonly label: "Done";
                 }];
                 readonly cardTitle: "title";
-                readonly cardFields: readonly ["priority"];
+                readonly cardFields: readonly ["priority", "owner"];
                 readonly cardFieldSchemas: {
                     readonly $state: "/schemas/tasks";
+                };
+                readonly members: {
+                    readonly $state: "/members";
                 };
             };
         };
@@ -199,11 +211,12 @@ export declare const catalog: import("@json-render/core").Catalog<{
                     type: import("zod").ZodEnum<{
                         number: "number";
                         date: "date";
+                        assignee: "assignee";
+                        person: "person";
                         text: "text";
                         select: "select";
                         multiSelect: "multiSelect";
                         checkbox: "checkbox";
-                        person: "person";
                         url: "url";
                     }>;
                     options: import("zod").ZodNullable<import("zod").ZodArray<import("zod").ZodObject<{
@@ -214,6 +227,14 @@ export declare const catalog: import("@json-render/core").Catalog<{
                 }, import("zod/v4/core").$strip>>>;
                 activeRowId: import("zod").ZodNullable<import("zod").ZodString>;
                 editValue: import("zod").ZodNullable<import("zod").ZodRecord<import("zod").ZodString, import("zod").ZodUnknown>>;
+                members: import("zod").ZodNullable<import("zod").ZodArray<import("zod").ZodObject<{
+                    userId: import("zod").ZodString;
+                    name: import("zod").ZodString;
+                    kind: import("zod").ZodNullable<import("zod").ZodEnum<{
+                        human: "human";
+                        agent: "agent";
+                    }>>;
+                }, import("zod/v4/core").$strip>>>;
             }, import("zod/v4/core").$strip>;
             readonly events: readonly ["editCell", "addRow", "deleteRow", "open"];
             readonly description: string;
@@ -229,6 +250,9 @@ export declare const catalog: import("@json-render/core").Catalog<{
                 };
                 readonly editValue: {
                     readonly $bindState: "/ui/tasks/editValue";
+                };
+                readonly members: {
+                    readonly $state: "/members";
                 };
             };
             readonly requiredBindStateProps: readonly ["activeRowId", "editValue"];
@@ -247,11 +271,12 @@ export declare const catalog: import("@json-render/core").Catalog<{
                     type: import("zod").ZodEnum<{
                         number: "number";
                         date: "date";
+                        assignee: "assignee";
+                        person: "person";
                         text: "text";
                         select: "select";
                         multiSelect: "multiSelect";
                         checkbox: "checkbox";
-                        person: "person";
                         url: "url";
                     }>;
                     options: import("zod").ZodNullable<import("zod").ZodArray<import("zod").ZodObject<{
@@ -293,11 +318,12 @@ export declare const catalog: import("@json-render/core").Catalog<{
                     type: import("zod").ZodEnum<{
                         number: "number";
                         date: "date";
+                        assignee: "assignee";
+                        person: "person";
                         text: "text";
                         select: "select";
                         multiSelect: "multiSelect";
                         checkbox: "checkbox";
-                        person: "person";
                         url: "url";
                     }>;
                     options: import("zod").ZodNullable<import("zod").ZodArray<import("zod").ZodObject<{

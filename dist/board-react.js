@@ -1,6 +1,6 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useBoundProp } from "@json-render/react";
-import { formatPropertyValue, selectOptionColorClass } from "./board.js";
+import { formatPropertyValue, resolveMemberDisplay, selectOptionColorClass } from "./board.js";
 function readCardField(item, field) {
     if (field === "id")
         return item.id;
@@ -14,6 +14,9 @@ function readCardField(item, field) {
 function cardFieldOption(schemas, field, value) {
     const options = schemas.find((s) => s.key === field)?.options ?? [];
     return options.find((o) => o.value === String(value));
+}
+function cardFieldType(schemas, field) {
+    return schemas.find((s) => s.key === field)?.type ?? null;
 }
 function deriveColumns(items, groupBy) {
     const seen = new Set();
@@ -38,6 +41,7 @@ export function Board({ props, bindings, emit, loading }) {
     const columns = props.columns && props.columns.length > 0 ? props.columns : deriveColumns(items, props.groupBy);
     const cardFields = props.cardFields ?? [];
     const cardFieldSchemas = props.cardFieldSchemas ?? [];
+    const members = props.members ?? [];
     if (columns.length === 0) {
         return _jsx("div", { className: "text-sm text-muted-foreground", children: "No cards yet." });
     }
@@ -77,8 +81,13 @@ export function Board({ props, bindings, emit, loading }) {
                                             const value = readCardField(item, field);
                                             if (value === undefined || value === null || value === "")
                                                 return null;
-                                            const option = cardFieldOption(cardFieldSchemas, field, value);
-                                            return (_jsx("span", { className: `rounded px-1.5 py-0.5 text-xs font-medium ${selectOptionColorClass(option?.color)}`, children: option?.label ?? formatPropertyValue(value) }, field));
+                                            const type = cardFieldType(cardFieldSchemas, field);
+                                            const isMemberField = type === "assignee" || type === "person";
+                                            const option = isMemberField ? undefined : cardFieldOption(cardFieldSchemas, field, value);
+                                            const label = isMemberField
+                                                ? resolveMemberDisplay(members, value)
+                                                : (option?.label ?? formatPropertyValue(value));
+                                            return (_jsx("span", { className: `rounded px-1.5 py-0.5 text-xs font-medium ${selectOptionColorClass(option?.color)}`, children: label }, field));
                                         }) })), _jsxs("div", { className: "mt-2 flex justify-between", children: [_jsxs("button", { type: "button", disabled: columnIndex === 0, className: "text-xs text-muted-foreground disabled:opacity-30", "aria-label": `Move ${String(readCardField(item, props.cardTitle) ?? "card")} to ${columns[columnIndex - 1]?.label ?? "previous column"}`, onClick: () => moveCard(item, columns[columnIndex - 1]?.value), children: ["\u2190 ", columns[columnIndex - 1]?.label ?? ""] }), _jsxs("button", { type: "button", disabled: columnIndex === columns.length - 1, className: "text-xs text-muted-foreground disabled:opacity-30", "aria-label": `Move ${String(readCardField(item, props.cardTitle) ?? "card")} to ${columns[columnIndex + 1]?.label ?? "next column"}`, onClick: () => moveCard(item, columns[columnIndex + 1]?.value), children: [columns[columnIndex + 1]?.label ?? "", " \u2192"] })] })] }, item.id)))] })] }, column.value));
         }) }));
 }

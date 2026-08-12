@@ -35,11 +35,12 @@ export declare const dataTablePreviewPropsSchema: z.ZodObject<{
         type: z.ZodEnum<{
             number: "number";
             date: "date";
+            assignee: "assignee";
+            person: "person";
             text: "text";
             select: "select";
             multiSelect: "multiSelect";
             checkbox: "checkbox";
-            person: "person";
             url: "url";
         }>;
         options: z.ZodNullable<z.ZodArray<z.ZodObject<{
@@ -66,11 +67,12 @@ export declare const dataTablePreviewComponentDefinition: {
             type: z.ZodEnum<{
                 number: "number";
                 date: "date";
+                assignee: "assignee";
+                person: "person";
                 text: "text";
                 select: "select";
                 multiSelect: "multiSelect";
                 checkbox: "checkbox";
-                person: "person";
                 url: "url";
             }>;
             options: z.ZodNullable<z.ZodArray<z.ZodObject<{
@@ -111,11 +113,12 @@ export declare const dataTableDetailPropsSchema: z.ZodObject<{
         type: z.ZodEnum<{
             number: "number";
             date: "date";
+            assignee: "assignee";
+            person: "person";
             text: "text";
             select: "select";
             multiSelect: "multiSelect";
             checkbox: "checkbox";
-            person: "person";
             url: "url";
         }>;
         options: z.ZodNullable<z.ZodArray<z.ZodObject<{
@@ -145,11 +148,12 @@ export declare const dataTableDetailComponentDefinition: {
             type: z.ZodEnum<{
                 number: "number";
                 date: "date";
+                assignee: "assignee";
+                person: "person";
                 text: "text";
                 select: "select";
                 multiSelect: "multiSelect";
                 checkbox: "checkbox";
-                person: "person";
                 url: "url";
             }>;
             options: z.ZodNullable<z.ZodArray<z.ZodObject<{

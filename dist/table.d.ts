@@ -25,11 +25,12 @@ export declare const tableColumnSchema: z.ZodObject<{
     type: z.ZodEnum<{
         number: "number";
         date: "date";
+        assignee: "assignee";
+        person: "person";
         text: "text";
         select: "select";
         multiSelect: "multiSelect";
         checkbox: "checkbox";
-        person: "person";
         url: "url";
     }>;
     options: z.ZodNullable<z.ZodArray<z.ZodObject<{
@@ -52,11 +53,12 @@ export declare const tablePropsSchema: z.ZodObject<{
         type: z.ZodEnum<{
             number: "number";
             date: "date";
+            assignee: "assignee";
+            person: "person";
             text: "text";
             select: "select";
             multiSelect: "multiSelect";
             checkbox: "checkbox";
-            person: "person";
             url: "url";
         }>;
         options: z.ZodNullable<z.ZodArray<z.ZodObject<{
@@ -67,6 +69,14 @@ export declare const tablePropsSchema: z.ZodObject<{
     }, z.core.$strip>>>;
     activeRowId: z.ZodNullable<z.ZodString>;
     editValue: z.ZodNullable<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
+    members: z.ZodNullable<z.ZodArray<z.ZodObject<{
+        userId: z.ZodString;
+        name: z.ZodString;
+        kind: z.ZodNullable<z.ZodEnum<{
+            human: "human";
+            agent: "agent";
+        }>>;
+    }, z.core.$strip>>>;
 }, z.core.$strip>;
 export type TableProps = z.infer<typeof tablePropsSchema>;
 export declare const tableComponentDefinition: {
@@ -83,11 +93,12 @@ export declare const tableComponentDefinition: {
             type: z.ZodEnum<{
                 number: "number";
                 date: "date";
+                assignee: "assignee";
+                person: "person";
                 text: "text";
                 select: "select";
                 multiSelect: "multiSelect";
                 checkbox: "checkbox";
-                person: "person";
                 url: "url";
             }>;
             options: z.ZodNullable<z.ZodArray<z.ZodObject<{
@@ -98,6 +109,14 @@ export declare const tableComponentDefinition: {
         }, z.core.$strip>>>;
         activeRowId: z.ZodNullable<z.ZodString>;
         editValue: z.ZodNullable<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
+        members: z.ZodNullable<z.ZodArray<z.ZodObject<{
+            userId: z.ZodString;
+            name: z.ZodString;
+            kind: z.ZodNullable<z.ZodEnum<{
+                human: "human";
+                agent: "agent";
+            }>>;
+        }, z.core.$strip>>>;
     }, z.core.$strip>;
     readonly events: readonly ["editCell", "addRow", "deleteRow", "open"];
     readonly description: string;
@@ -113,6 +132,9 @@ export declare const tableComponentDefinition: {
         };
         readonly editValue: {
             readonly $bindState: "/ui/tasks/editValue";
+        };
+        readonly members: {
+            readonly $state: "/members";
         };
     };
     readonly requiredBindStateProps: readonly ["activeRowId", "editValue"];

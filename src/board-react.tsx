@@ -7,8 +7,8 @@
  */
 import type { BaseComponentProps } from "@json-render/react";
 import { useBoundProp } from "@json-render/react";
-import { formatPropertyValue, selectOptionColorClass } from "./board.js";
-import type { BoardItem, BoardProps, CardFieldSchemaEntry } from "./board.js";
+import { formatPropertyValue, resolveMemberDisplay, selectOptionColorClass } from "./board.js";
+import type { BoardItem, BoardMember, BoardProps, CardFieldSchemaEntry } from "./board.js";
 
 function readCardField(item: BoardItem, field: string): unknown {
   if (field === "id") return item.id;
@@ -21,6 +21,10 @@ function readCardField(item: BoardItem, field: string): unknown {
 function cardFieldOption(schemas: CardFieldSchemaEntry[], field: string, value: unknown) {
   const options = schemas.find((s) => s.key === field)?.options ?? [];
   return options.find((o) => o.value === String(value));
+}
+
+function cardFieldType(schemas: CardFieldSchemaEntry[], field: string): string | null {
+  return schemas.find((s) => s.key === field)?.type ?? null;
 }
 
 function deriveColumns(items: BoardItem[], groupBy: string): { value: string; label: string }[] {
@@ -62,6 +66,7 @@ export function Board({ props, bindings, emit, loading }: BaseComponentProps<Boa
   const columns = props.columns && props.columns.length > 0 ? props.columns : deriveColumns(items, props.groupBy);
   const cardFields = props.cardFields ?? [];
   const cardFieldSchemas = props.cardFieldSchemas ?? [];
+  const members: BoardMember[] = props.members ?? [];
 
   if (columns.length === 0) {
     return <div className="text-sm text-muted-foreground">No cards yet.</div>;
@@ -145,13 +150,18 @@ export function Board({ props, bindings, emit, loading }: BaseComponentProps<Boa
                       {cardFields.map((field) => {
                         const value = readCardField(item, field);
                         if (value === undefined || value === null || value === "") return null;
-                        const option = cardFieldOption(cardFieldSchemas, field, value);
+                        const type = cardFieldType(cardFieldSchemas, field);
+                        const isMemberField = type === "assignee" || type === "person";
+                        const option = isMemberField ? undefined : cardFieldOption(cardFieldSchemas, field, value);
+                        const label = isMemberField
+                          ? resolveMemberDisplay(members, value)
+                          : (option?.label ?? formatPropertyValue(value));
                         return (
                           <span
                             key={field}
                             className={`rounded px-1.5 py-0.5 text-xs font-medium ${selectOptionColorClass(option?.color)}`}
                           >
-                            {option?.label ?? formatPropertyValue(value)}
+                            {label}
                           </span>
                         );
                       })}

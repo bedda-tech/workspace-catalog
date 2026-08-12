@@ -10,8 +10,8 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 import type { BaseComponentProps } from "@json-render/react";
 import { useBoundProp } from "@json-render/react";
-import { formatPropertyValue, selectOptionColorClass } from "./board.js";
-import type { BoardItem } from "./board.js";
+import { formatPropertyValue, resolveMemberDisplay, selectOptionColorClass } from "./board.js";
+import type { BoardItem, BoardMember } from "./board.js";
 import type { TableColumn, TableProps } from "./table.js";
 
 /**
@@ -36,8 +36,9 @@ export function deriveColumns(items: BoardItem[]): TableColumn[] {
   return Array.from(seen).map((key) => ({ key, name: key, type: "text" as const, options: null }));
 }
 
-export function formatCell(column: TableColumn, value: unknown): string {
+export function formatCell(column: TableColumn, value: unknown, members?: BoardMember[] | null): string {
   if (value === null || value === undefined || value === "") return "";
+  if (column.type === "assignee" || column.type === "person") return resolveMemberDisplay(members, value);
   if (column.type === "select" || column.type === "multiSelect") {
     const values = Array.isArray(value) ? value : [value];
     const options = column.options ?? [];
@@ -60,8 +61,8 @@ export function formatCell(column: TableColumn, value: unknown): string {
  * formatCell, which stays a pure string (search/filter in datatable-react.tsx needs a
  * string to match against, not JSX).
  */
-export function renderCell(column: TableColumn, value: unknown): ReactNode {
-  if (column.type !== "select" && column.type !== "multiSelect") return formatCell(column, value);
+export function renderCell(column: TableColumn, value: unknown, members?: BoardMember[] | null): ReactNode {
+  if (column.type !== "select" && column.type !== "multiSelect") return formatCell(column, value, members);
   if (value === null || value === undefined || value === "") return "";
   const values = Array.isArray(value) ? value : [value];
   const options = column.options ?? [];
@@ -169,6 +170,7 @@ export function Table({ props, bindings, emit, loading }: BaseComponentProps<Tab
 
   const items = props.items ?? [];
   const columns = props.columns && props.columns.length > 0 ? props.columns : deriveColumns(items);
+  const members = props.members ?? [];
 
   const [, setActiveRowId] = useBoundProp(props.activeRowId, bindings?.activeRowId);
   const [, setEditValue] = useBoundProp(props.editValue, bindings?.editValue);
@@ -262,7 +264,7 @@ export function Table({ props, bindings, emit, loading }: BaseComponentProps<Tab
                         className="block min-h-[1.25rem] w-full text-left"
                         onClick={() => setEditing({ rowId: item.id, key: column.key })}
                       >
-                        {renderCell(column, value) || <span className="text-muted-foreground">—</span>}
+                        {renderCell(column, value, members) || <span className="text-muted-foreground">—</span>}
                       </button>
                     )}
                   </td>

@@ -8,7 +8,7 @@
  */
 import type { ReactNode } from "react";
 import type { BaseComponentProps } from "@json-render/react";
-import type { BoardItem } from "./board.js";
+import type { BoardItem, BoardMember } from "./board.js";
 import type { TableColumn, TableProps } from "./table.js";
 /**
  * Exported so datatable-react.tsx (DataTableDetail) can reuse the exact same cell
@@ -18,7 +18,7 @@ import type { TableColumn, TableProps } from "./table.js";
  */
 export declare function readCellValue(item: BoardItem, key: string): unknown;
 export declare function deriveColumns(items: BoardItem[]): TableColumn[];
-export declare function formatCell(column: TableColumn, value: unknown): string;
+export declare function formatCell(column: TableColumn, value: unknown, members?: BoardMember[] | null): string;
 /**
  * Read-view cell rendering — a select/multiSelect column renders each value as a colored
  * badge (falling back to a flat neutral pill when the option has no "color") instead of the
@@ -26,7 +26,7 @@ export declare function formatCell(column: TableColumn, value: unknown): string;
  * formatCell, which stays a pure string (search/filter in datatable-react.tsx needs a
  * string to match against, not JSX).
  */
-export declare function renderCell(column: TableColumn, value: unknown): ReactNode;
+export declare function renderCell(column: TableColumn, value: unknown, members?: BoardMember[] | null): ReactNode;
 export declare function TableSkeleton(): import("react").JSX.Element;
 export declare function CellEditor({ column, value, onCommit, onCancel, }: {
     column: TableColumn;

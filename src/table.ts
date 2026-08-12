@@ -19,14 +19,18 @@
  * board.ts uses for activeCardId/moveTarget, generalized to a dynamic key.
  */
 import { z } from "zod";
-import { boardItemSchema, selectOptionSchema } from "./board.js";
+import { boardItemSchema, boardMemberSchema, selectOptionSchema } from "./board.js";
 
 export const tableColumnSchema = z.object({
   key: z.string(),
   name: z.string(),
   type: z
-    .enum(["text", "number", "select", "multiSelect", "date", "checkbox", "person", "url"])
-    .describe("Which editor the cell renders: select/multiSelect show a picker, date a date input, checkbox a checkbox, others a text/number field."),
+    .enum(["text", "number", "select", "multiSelect", "date", "checkbox", "person", "url", "assignee"])
+    .describe(
+      "Which editor the cell renders and how its value is displayed: select/multiSelect show " +
+        "a picker, date a date input, checkbox a checkbox, assignee/person resolve through " +
+        "the `members` prop to a display name, others a text/number field.",
+    ),
   options: z
     .array(selectOptionSchema)
     .nullable()
@@ -54,6 +58,14 @@ export const tablePropsSchema = z.object({
     .record(z.string(), z.unknown())
     .nullable()
     .describe("Bind with { \"$bindState\": \"<path>\" }. Table writes { [editedColumnKey]: newValue } here immediately before emitting editCell — bind the action's whole \"properties\" param to this path with { \"$state\": \"<same path>\" }, do not nest a specific key."),
+  members: z
+    .array(boardMemberSchema)
+    .nullable()
+    .describe(
+      "Channel members (human + agent). BIND: { \"$state\": \"/members\" } whenever any " +
+        "column is assignee or person typed, so that column's cells resolve to the member's " +
+        "name instead of showing a raw stored userId/string.",
+    ),
 });
 export type TableProps = z.infer<typeof tablePropsSchema>;
 
@@ -76,12 +88,15 @@ export const tableComponentDefinition = {
     "A select/multiSelect column with no per-option \"color\" set renders every value as the same " +
     "flat neutral pill — set one for severity/priority/status-shaped columns (e.g. low=gray, " +
     "medium=yellow, high=orange, critical=red) so values read as visually distinct, not just " +
-    "distinguishable by their text.",
+    "distinguishable by their text. An assignee/person column renders a raw stored " +
+    "userId/string unless `members` is also bound — set it whenever any column is assignee " +
+    "or person typed.",
   example: {
     items: { $state: "/data/tasks" },
     columns: { $state: "/schemas/tasks" },
     activeRowId: { $bindState: "/ui/tasks/activeRowId" },
     editValue: { $bindState: "/ui/tasks/editValue" },
+    members: { $state: "/members" },
   },
   // activeRowId/editValue MUST both be `{"$bindState":"<path>"}` — never omitted, never a
   // literal — or a cell edit visibly happens then silently reverts (task 6512): Table

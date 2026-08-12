@@ -68,16 +68,47 @@ export function selectOptionColorClass(color: string | null | undefined): string
 }
 
 /** Board's cardFields is a bare list of property-name strings (see below) — this is the
- * optional companion that gives cardFields access to each field's select options, so a
- * severity/priority/status-shaped card badge can be colored instead of a flat neutral
- * pill for every value. Bind to the SAME "/schemas/<name>" path Table's `columns` prop
- * uses (task 6593) — extra PropertyDef fields (name/type/required/defaultValue) beyond
- * key/options are simply ignored here. */
+ * optional companion that gives cardFields access to each field's select options and type,
+ * so a severity/priority/status-shaped card badge can be colored instead of a flat neutral
+ * pill for every value, and an assignee/person-shaped badge can be resolved through
+ * `members` instead of shown raw. Bind to the SAME "/schemas/<name>" path Table's `columns`
+ * prop uses (task 6593) — extra PropertyDef fields (name/required/defaultValue) beyond
+ * key/type/options are simply ignored here. */
 export const cardFieldSchemaEntrySchema = z.object({
   key: z.string(),
+  type: z.string().nullable(),
   options: z.array(selectOptionSchema).nullable(),
 });
 export type CardFieldSchemaEntry = z.infer<typeof cardFieldSchemaEntrySchema>;
+
+/**
+ * A channel member (human or agent) — the SAME shape convex/channels.ts `members` query
+ * returns. "assignee" properties store a member's userId (convex/properties.ts); "person"
+ * properties store free-text that MAY happen to match a member's name. Both need this list
+ * to render as a name instead of a raw id/string that only means something to the database.
+ */
+export const boardMemberSchema = z.object({
+  userId: z.string(),
+  name: z.string(),
+  kind: z.enum(["human", "agent"]).nullable(),
+});
+export type BoardMember = z.infer<typeof boardMemberSchema>;
+
+/**
+ * Resolves an "assignee" (member userId) or "person" (free-text name that may match a
+ * member) value to a display name — agent-kind members get the same 🤖 prefix
+ * RecordPanel.tsx's assignee/person pickers already use, so a card or cell reads the same
+ * way the record's own edit form does. Falls back to the raw stored value when nothing
+ * matches (no `members` bound yet, or the member was since removed) — never blanks a real
+ * stored value out from under the reader.
+ */
+export function resolveMemberDisplay(members: BoardMember[] | null | undefined, value: unknown): string {
+  if (value === null || value === undefined || value === "") return "";
+  const raw = String(value);
+  const match = (members ?? []).find((m) => m.userId === raw || m.name === raw);
+  if (!match) return raw;
+  return match.kind === "agent" ? `🤖 ${match.name}` : match.name;
+}
 
 /**
  * Shared by Board's cardFields and Table's cell rendering (table-react.tsx) so the same
@@ -137,6 +168,16 @@ export const boardPropsSchema = z.object({
     .string()
     .nullable()
     .describe("Bind with { \"$bindState\": \"<path>\" }. Board writes the destination column's value here immediately before emitting move/add — read it back the same way as activeCardId."),
+  members: z
+    .array(boardMemberSchema)
+    .nullable()
+    .describe(
+      "Channel members (human + agent). BIND: { \"$state\": \"/members\" } whenever any " +
+        "cardFields entry is assignee or person typed, so that field resolves to the " +
+        "member's name instead of showing a raw stored userId/string. Requires " +
+        "cardFieldSchemas to also be bound (Board needs each field's declared type to know " +
+        "which ones to resolve this way).",
+    ),
 });
 export type BoardProps = z.infer<typeof boardPropsSchema>;
 
@@ -153,7 +194,9 @@ export const boardComponentDefinition = {
     "A cardFields badge for a select/multiSelect property renders a flat neutral pill unless " +
     "cardFieldSchemas is also bound — set both together whenever a cardFields entry is a " +
     "severity/priority/status-shaped select, so critical reads as visually distinct from low " +
-    "at a glance instead of only by its text label.",
+    "at a glance instead of only by its text label. An assignee/person cardFields entry " +
+    "renders a raw stored userId/string unless `members` is ALSO bound (in addition to " +
+    "cardFieldSchemas) — set both whenever a cardFields entry is assignee or person typed.",
   example: {
     groupBy: "status",
     columns: [
@@ -162,7 +205,8 @@ export const boardComponentDefinition = {
       { value: "done", label: "Done" },
     ],
     cardTitle: "title",
-    cardFields: ["priority"],
+    cardFields: ["priority", "owner"],
     cardFieldSchemas: { $state: "/schemas/tasks" },
+    members: { $state: "/members" },
   },
 } as const;
