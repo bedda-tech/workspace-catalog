@@ -18,15 +18,34 @@ function cardFieldOption(schemas, field, value) {
 function cardFieldType(schemas, field) {
     return schemas.find((s) => s.key === field)?.type ?? null;
 }
-function deriveColumns(items, groupBy) {
-    const seen = new Set();
+/**
+ * Column order should follow the groupBy field's declared select options (e.g. a funnel's
+ * applied → screen → onsite → offer → hired → rejected order) rather than the order values
+ * happen to appear in the data — task 6736: a Board grouped by a sequential-pipeline field
+ * scrambled left-to-right on every re-render because it sorted by first-appearance-in-items
+ * instead. Falls back to encounter order for values with no declared option (an undeclared
+ * value, or a groupBy field with no options at all — e.g. free text).
+ */
+function deriveColumns(items, groupBy, cardFieldSchemas) {
+    const encountered = new Set();
     for (const item of items) {
         const raw = item.properties?.[groupBy];
         if (raw === undefined || raw === null)
             continue;
-        seen.add(String(raw));
+        encountered.add(String(raw));
     }
-    return Array.from(seen).map((value) => ({ value, label: value }));
+    const options = cardFieldSchemas.find((s) => s.key === groupBy)?.options;
+    if (!options || options.length === 0) {
+        return Array.from(encountered).map((value) => ({ value, label: value }));
+    }
+    const declared = new Set(options.map((o) => o.value));
+    const ordered = options
+        .filter((o) => encountered.has(o.value))
+        .map((o) => ({ value: o.value, label: o.label ?? o.value }));
+    const undeclared = Array.from(encountered)
+        .filter((value) => !declared.has(value))
+        .map((value) => ({ value, label: value }));
+    return [...ordered, ...undeclared];
 }
 /** Placeholder columns shown while the bound data source's first read is still in flight. */
 const SKELETON_COLUMNS = 3;
@@ -38,10 +57,12 @@ export function Board({ props, bindings, emit, loading }) {
     if (loading)
         return _jsx(BoardSkeleton, {});
     const items = props.items ?? [];
-    const columns = props.columns && props.columns.length > 0 ? props.columns : deriveColumns(items, props.groupBy);
     const cardFields = props.cardFields ?? [];
     const cardFieldSchemas = props.cardFieldSchemas ?? [];
     const members = props.members ?? [];
+    const columns = props.columns && props.columns.length > 0
+        ? props.columns
+        : deriveColumns(items, props.groupBy, cardFieldSchemas);
     if (columns.length === 0) {
         return _jsx("div", { className: "text-sm text-muted-foreground", children: "No cards yet." });
     }
