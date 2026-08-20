@@ -34,29 +34,42 @@ function cardFieldType(schemas: CardFieldSchemaEntry[], field: string): string |
  * scrambled left-to-right on every re-render because it sorted by first-appearance-in-items
  * instead. Falls back to encounter order for values with no declared option (an undeclared
  * value, or a groupBy field with no options at all — e.g. free text).
+ *
+ * ALL declared options become columns, even ones with zero cards right now (task 7351): a
+ * terminal stage like "won"/"lost" that starts empty must still render its column, or the
+ * per-card arrow button that's supposed to move a card INTO it has no column to point at —
+ * it falls off the end of the (undersized) columns array, comes out disabled with a blank
+ * label ("Move X to next column" instead of "Move X to Won"), and the move is impossible
+ * from the UI. This is standard kanban behavior: a pipeline's stages are a property of the
+ * schema, not of which stages happen to be occupied at this instant.
  */
 function deriveColumns(
   items: BoardItem[],
   groupBy: string,
   cardFieldSchemas: CardFieldSchemaEntry[],
 ): { value: string; label: string }[] {
-  const encountered = new Set<string>();
-  for (const item of items) {
-    const raw = item.properties?.[groupBy];
-    if (raw === undefined || raw === null) continue;
-    encountered.add(String(raw));
-  }
   const options = cardFieldSchemas.find((s) => s.key === groupBy)?.options;
   if (!options || options.length === 0) {
+    const encountered = new Set<string>();
+    for (const item of items) {
+      const raw = item.properties?.[groupBy];
+      if (raw === undefined || raw === null) continue;
+      encountered.add(String(raw));
+    }
     return Array.from(encountered).map((value) => ({ value, label: value }));
   }
   const declared = new Set(options.map((o) => o.value));
-  const ordered = options
-    .filter((o) => encountered.has(o.value))
-    .map((o) => ({ value: o.value, label: o.label ?? o.value }));
-  const undeclared = Array.from(encountered)
-    .filter((value) => !declared.has(value))
-    .map((value) => ({ value, label: value }));
+  const ordered = options.map((o) => ({ value: o.value, label: o.label ?? o.value }));
+  const undeclared: { value: string; label: string }[] = [];
+  const seenUndeclared = new Set<string>();
+  for (const item of items) {
+    const raw = item.properties?.[groupBy];
+    if (raw === undefined || raw === null) continue;
+    const value = String(raw);
+    if (declared.has(value) || seenUndeclared.has(value)) continue;
+    seenUndeclared.add(value);
+    undeclared.push({ value, label: value });
+  }
   return [...ordered, ...undeclared];
 }
 
