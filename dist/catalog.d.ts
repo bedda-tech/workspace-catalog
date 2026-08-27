@@ -359,6 +359,57 @@ export declare const catalog: import("@json-render/core").Catalog<{
             };
             readonly requiredBindStateProps: readonly ["activeRowId", "editValue"];
         };
+        Chart: {
+            readonly props: import("zod").ZodObject<{
+                type: import("zod").ZodEnum<{
+                    bar: "bar";
+                    line: "line";
+                    area: "area";
+                }>;
+                data: import("zod").ZodArray<import("zod").ZodRecord<import("zod").ZodString, import("zod").ZodUnion<readonly [import("zod").ZodString, import("zod").ZodNumber, import("zod").ZodNull]>>>;
+                xKey: import("zod").ZodString;
+                series: import("zod").ZodArray<import("zod").ZodObject<{
+                    key: import("zod").ZodString;
+                    label: import("zod").ZodString;
+                }, import("zod/v4/core").$strip>>;
+                stacked: import("zod").ZodNullable<import("zod").ZodBoolean>;
+                height: import("zod").ZodNullable<import("zod").ZodNumber>;
+                yFormat: import("zod").ZodNullable<import("zod").ZodEnum<{
+                    number: "number";
+                    currency: "currency";
+                    percent: "percent";
+                }>>;
+            }, import("zod/v4/core").$strip>;
+            readonly events: readonly [];
+            readonly description: string;
+            readonly example: {
+                readonly type: "line";
+                readonly data: readonly [{
+                    readonly month: "May";
+                    readonly income: 6400;
+                    readonly spend: 5100;
+                }, {
+                    readonly month: "Jun";
+                    readonly income: 6449;
+                    readonly spend: 4772;
+                }, {
+                    readonly month: "Jul";
+                    readonly income: 6580;
+                    readonly spend: 4390;
+                }];
+                readonly xKey: "month";
+                readonly series: readonly [{
+                    readonly key: "income";
+                    readonly label: "Income";
+                }, {
+                    readonly key: "spend";
+                    readonly label: "Spend";
+                }];
+                readonly stacked: null;
+                readonly height: null;
+                readonly yFormat: "currency";
+            };
+        };
         Heading: {
             props: import("zod").ZodObject<{
                 text: import("zod").ZodString;

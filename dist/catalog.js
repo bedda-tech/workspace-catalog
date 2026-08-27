@@ -23,6 +23,7 @@ import { boardComponentDefinition } from "./board.js";
 import { tableComponentDefinition } from "./table.js";
 import { dataTableDetailComponentDefinition, dataTablePreviewComponentDefinition } from "./datatable.js";
 import { pageHeaderComponentDefinition } from "./pageheader.js";
+import { chartComponentDefinition } from "./chart.js";
 export const catalog = defineCatalog(schema, {
     components: {
         // Layout
@@ -38,6 +39,7 @@ export const catalog = defineCatalog(schema, {
         DataTablePreview: dataTablePreviewComponentDefinition,
         DataTableDetail: dataTableDetailComponentDefinition,
         // Data display
+        Chart: chartComponentDefinition,
         Heading: defs.Heading,
         Text: defs.Text,
         Badge: defs.Badge,

@@ -23,6 +23,7 @@ import { Board } from "./board-react.js";
 import { Table } from "./table-react.js";
 import { DataTableDetail, DataTablePreview } from "./datatable-react.js";
 import { PageHeader } from "./pageheader-react.js";
+import { Chart } from "./chart-react.js";
 export function createRegistry(handlers) {
     return defineRegistry(catalog, {
         components: {
@@ -36,6 +37,7 @@ export function createRegistry(handlers) {
             Table,
             DataTablePreview,
             DataTableDetail,
+            Chart,
             Heading: impl.Heading,
             Text: impl.Text,
             Badge: impl.Badge,
